@@ -1,0 +1,9 @@
+{
+  "profile_id": "ai-builder",
+  "role": "AI 应用开发者",
+  "preferred_languages": ["TypeScript", "Python"],
+  "interested_topics": ["llm", "agent", "rag", "ai-engineering", "developer-tools"],
+  "learning_goals": ["做应用", "发现可做成应用的项目", "跟趋势"],
+  "excluded_topics": ["blockchain"],
+  "daily_limit": 10
+}

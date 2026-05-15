@@ -1,0 +1,9 @@
+{
+  "profile_id": "default",
+  "role": "开发者",
+  "preferred_languages": ["TypeScript", "Java", "Python"],
+  "interested_topics": ["llm", "agent", "developer-tools", "distributed-systems"],
+  "learning_goals": ["找工作", "学习工程架构", "发现可做成应用的项目"],
+  "excluded_topics": ["blockchain"],
+  "daily_limit": 10
+}

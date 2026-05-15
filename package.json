@@ -1,0 +1,21 @@
+{
+  "name": "repopulse",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "面向开发者学习决策的 GitHub 项目情报日报系统",
+  "bin": {
+    "repopulse": "./src/cli.js"
+  },
+  "scripts": {
+    "start": "node src/cli.js run",
+    "report": "node src/cli.js run",
+    "doctor": "node src/cli.js doctor",
+    "profiles": "node src/cli.js profiles",
+    "test": "node --test",
+    "check": "node --check src/cli.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

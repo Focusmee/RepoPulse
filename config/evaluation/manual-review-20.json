@@ -1,0 +1,161 @@
+{
+  "schema_version": "1.0",
+  "purpose": "RepoPulse 人工评测样本，用于校准学习价值评分、AI prompt 和日报推荐质量。",
+  "review_dimensions": [
+    "summary_accuracy",
+    "evidence_quality",
+    "learning_score_reasonableness",
+    "reading_path_actionability",
+    "risk_quality",
+    "profile_fit_quality"
+  ],
+  "score_scale": {
+    "1": "明显错误或不可用",
+    "2": "偏弱，需要大改",
+    "3": "基本可用",
+    "4": "较好，有判断价值",
+    "5": "很好，可以作为标杆"
+  },
+  "samples": [
+    {
+      "full_name": "langgenius/dify",
+      "profile_id": "ai-builder",
+      "expected_focus": ["AI 应用平台", "Agent workflow", "可转化应用"],
+      "human_learning_score": null,
+      "review": {}
+    },
+    {
+      "full_name": "ollama/ollama",
+      "profile_id": "ai-builder",
+      "expected_focus": ["本地模型运行", "开发者工具", "应用集成"],
+      "human_learning_score": null,
+      "review": {}
+    },
+    {
+      "full_name": "langchain-ai/langchain",
+      "profile_id": "ai-builder",
+      "expected_focus": ["LLM 应用框架", "生态代表性", "源码阅读难度"],
+      "human_learning_score": null,
+      "review": {}
+    },
+    {
+      "full_name": "microsoft/autogen",
+      "profile_id": "ai-builder",
+      "expected_focus": ["多 Agent", "实验性框架", "应用迁移价值"],
+      "human_learning_score": null,
+      "review": {}
+    },
+    {
+      "full_name": "vercel/ai",
+      "profile_id": "ai-builder",
+      "expected_focus": ["AI SDK", "TypeScript", "产品集成"],
+      "human_learning_score": null,
+      "review": {}
+    },
+    {
+      "full_name": "vercel/next.js",
+      "profile_id": "default",
+      "expected_focus": ["Web 框架", "工程结构", "生态成熟度"],
+      "human_learning_score": null,
+      "review": {}
+    },
+    {
+      "full_name": "facebook/react",
+      "profile_id": "default",
+      "expected_focus": ["前端框架", "源码学习", "成熟项目"],
+      "human_learning_score": null,
+      "review": {}
+    },
+    {
+      "full_name": "microsoft/vscode",
+      "profile_id": "default",
+      "expected_focus": ["大型桌面应用", "插件系统", "工程复杂度"],
+      "human_learning_score": null,
+      "review": {}
+    },
+    {
+      "full_name": "supabase/supabase",
+      "profile_id": "default",
+      "expected_focus": ["开源 BaaS", "全栈产品", "应用转化"],
+      "human_learning_score": null,
+      "review": {}
+    },
+    {
+      "full_name": "kubernetes/kubernetes",
+      "profile_id": "java-backend",
+      "expected_focus": ["分布式系统", "云原生", "源码难度高"],
+      "human_learning_score": null,
+      "review": {}
+    },
+    {
+      "full_name": "spring-projects/spring-boot",
+      "profile_id": "java-backend",
+      "expected_focus": ["Java 后端", "框架设计", "求职价值"],
+      "human_learning_score": null,
+      "review": {}
+    },
+    {
+      "full_name": "apache/kafka",
+      "profile_id": "java-backend",
+      "expected_focus": ["消息队列", "分布式系统", "源码阅读"],
+      "human_learning_score": null,
+      "review": {}
+    },
+    {
+      "full_name": "redis/redis",
+      "profile_id": "java-backend",
+      "expected_focus": ["数据结构", "存储系统", "经典源码"],
+      "human_learning_score": null,
+      "review": {}
+    },
+    {
+      "full_name": "elastic/elasticsearch",
+      "profile_id": "java-backend",
+      "expected_focus": ["搜索引擎", "分布式系统", "Java"],
+      "human_learning_score": null,
+      "review": {}
+    },
+    {
+      "full_name": "grafana/grafana",
+      "profile_id": "default",
+      "expected_focus": ["可观测性", "Dashboard", "工程产品化"],
+      "human_learning_score": null,
+      "review": {}
+    },
+    {
+      "full_name": "prometheus/prometheus",
+      "profile_id": "java-backend",
+      "expected_focus": ["监控系统", "时间序列", "云原生"],
+      "human_learning_score": null,
+      "review": {}
+    },
+    {
+      "full_name": "fastapi/fastapi",
+      "profile_id": "default",
+      "expected_focus": ["API 框架", "文档质量", "应用开发"],
+      "human_learning_score": null,
+      "review": {}
+    },
+    {
+      "full_name": "tiangolo/full-stack-fastapi-template",
+      "profile_id": "default",
+      "expected_focus": ["模板项目", "实战迁移", "应用开发"],
+      "human_learning_score": null,
+      "review": {}
+    },
+    {
+      "full_name": "n8n-io/n8n",
+      "profile_id": "ai-builder",
+      "expected_focus": ["自动化工作流", "产品化", "插件生态"],
+      "human_learning_score": null,
+      "review": {}
+    },
+    {
+      "full_name": "apache/airflow",
+      "profile_id": "java-backend",
+      "expected_focus": ["工作流调度", "数据工程", "架构学习"],
+      "human_learning_score": null,
+      "review": {}
+    }
+  ]
+}
