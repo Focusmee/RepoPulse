@@ -2,7 +2,7 @@ import { daysBetween } from "../shared/date.js";
 import { clamp, round } from "../shared/math.js";
 import { calculateProfileMatchScore } from "../scorers/profileMatch.js";
 
-export function rankAnalyzedRepos({ repos, analyses, trends, profile, recentRepoIds = new Set(), limit = 10 }) {
+export function rankAnalyzedRepos({ repos, analyses, trends, profile, recentRepoIds = new Set(), referenceDate, limit = 10 }) {
   const items = repos
     .map((repo) => {
       const analysis = analyses.get(String(repo.repo_id));
@@ -12,7 +12,7 @@ export function rankAnalyzedRepos({ repos, analyses, trends, profile, recentRepo
       const learningScore = Number(analysis.learning_value?.score || 0);
       const profileMatchScore = Number(analysis.profile_fit?.score || calculateProfileMatchScore(repo, profile, analysisText));
       const noveltyScore = recentRepoIds.has(String(repo.repo_id)) ? 30 : 90;
-      const penaltyScore = calculatePenalty(repo, analysis);
+      const penaltyScore = calculatePenalty(repo, analysis, referenceDate);
       const personalizedScore =
         0.25 * Number(trend.trend_score || 0) +
         0.45 * learningScore +
@@ -44,11 +44,11 @@ export function rankAnalyzedRepos({ repos, analyses, trends, profile, recentRepo
   };
 }
 
-function calculatePenalty(repo, analysis) {
+export function calculatePenalty(repo, analysis, referenceDate) {
   let penalty = 0;
   if (!repo.license) penalty += 4;
   if (repo.archived) penalty += 30;
-  if (daysBetween(repo.pushed_at) > 180) penalty += 10;
+  if (daysBetween(repo.pushed_at, referenceDate) > 180) penalty += 10;
   if (Number(analysis.confidence?.score || 0) < 60) penalty += 12;
   if (analysis.risks?.some((risk) => risk.severity === "high")) penalty += 8;
   return penalty;

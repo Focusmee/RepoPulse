@@ -3,35 +3,58 @@ import { GitHubClient } from "../collectors/githubClient.js";
 import { collectCandidates } from "../collectors/index.js";
 import { loadProfile, loadWatchlist } from "../config/profile.js";
 import { getRuntimeConfig } from "../config/env.js";
+import { parseDateOption, parseIntegerOption } from "../config/options.js";
+import { DEFAULT_DOCUMENT_TTL_HOURS, shouldReuseDocument } from "../documents/cachePolicy.js";
 import { fetchRepoDocuments } from "../documents/readmeFetcher.js";
 import { analyzeRepo } from "../ai/analyzer.js";
+import { preselectRepos } from "../rankers/preselector.js";
 import { rankAnalyzedRepos } from "../rankers/personalizedRanker.js";
 import { renderMarkdownReport } from "../reports/renderMarkdown.js";
 import { buildSnapshots, calculateTrendScores } from "../scorers/trendScorer.js";
 import { mapLimit } from "../shared/async.js";
-import { todayString } from "../shared/date.js";
+import { addDays, todayString } from "../shared/date.js";
 import { ensureDir, writeText } from "../shared/fs.js";
 import { stableHash } from "../shared/text.js";
 import { JsonStore } from "../store/jsonStore.js";
 
 export async function runDailyDigest(options = {}) {
-  const runtimeConfig = getRuntimeConfig();
-  const date = options.date || todayString(runtimeConfig.timeZone);
+  const runtimeConfig = options.runtimeConfig || getRuntimeConfig();
+  const date = parseDateOption(options.date, "date") || todayString(runtimeConfig.timeZone);
   const profile = await loadProfile(options.profilePath);
   const watchlist = await loadWatchlist(options.watchlistPath);
-  const store = await new JsonStore(options.storePath || runtimeConfig.storePath).load();
-  const client = new GitHubClient({ token: runtimeConfig.githubToken });
+  const store = options.store || (await new JsonStore(options.storePath || runtimeConfig.storePath).load());
+  const client = options.client || new GitHubClient({ token: runtimeConfig.githubToken, timeoutMs: runtimeConfig.githubTimeoutMs });
   const logger = options.logger || console;
 
-  logger.info(`RepoPulse 开始生成日报：date=${date}, profile=${profile.profile_id}`);
+  const maxCandidates = parseIntegerOption(options.maxCandidates, "maxCandidates", { min: 1, max: 500, defaultValue: 80 });
+  const maxSearchQueries = parseIntegerOption(options.maxSearchQueries, "maxSearchQueries", {
+    min: 0,
+    max: 50,
+    defaultValue: runtimeConfig.githubToken ? 10 : 4
+  });
+  const perSearchQuery = parseIntegerOption(options.perSearchQuery, "perSearchQuery", { min: 1, max: 100, defaultValue: 12 });
+  const maxAnalyze = parseIntegerOption(options.maxAnalyze, "maxAnalyze", { min: 1, max: 200, defaultValue: 20 });
+  const limit = parseIntegerOption(options.limit, "limit", { min: 1, max: 100, defaultValue: profile.daily_limit || 10 });
+  const concurrency = parseIntegerOption(options.concurrency, "concurrency", { min: 1, max: 20, defaultValue: 3 });
+  const documentTtlHours = parseIntegerOption(options.documentTtlHours, "documentTtlHours", {
+    min: 1,
+    max: 720,
+    defaultValue: DEFAULT_DOCUMENT_TTL_HOURS
+  });
 
-  const candidates = await collectCandidates({
+  const collectCandidatesFn = options.collectCandidatesFn || collectCandidates;
+  const analyzeRepoFn = options.analyzeRepoFn || analyzeRepo;
+
+  logger.info(`RepoPulse start: date=${date}, profile=${profile.profile_id}`);
+
+  const candidates = await collectCandidatesFn({
     client,
     profile,
     watchlist,
-    maxCandidates: Number(options.maxCandidates || 80),
-    maxSearchQueries: Number(options.maxSearchQueries || (runtimeConfig.githubToken ? 10 : 4)),
-    perSearchQuery: Number(options.perSearchQuery || 12),
+    maxCandidates,
+    maxSearchQueries,
+    perSearchQuery,
+    sinceDate: addDays(date, -30),
     includeTrending: options.includeTrending !== false,
     logger
   });
@@ -49,64 +72,47 @@ export async function runDailyDigest(options = {}) {
   }
 
   const trends = calculateTrendScores(repos, store, date);
-  const analyzeLimit = Math.min(Number(options.maxAnalyze || 20), repos.length);
-  const preselected = repos
-    .slice()
-    .sort((a, b) => (trends.get(String(b.repo_id))?.trend_score || 0) - (trends.get(String(a.repo_id))?.trend_score || 0))
-    .slice(0, analyzeLimit);
+  const analyzeLimit = Math.min(maxAnalyze, repos.length);
+  const preselected = preselectRepos({ repos, trends, profile, limit: analyzeLimit });
 
-  logger.info(`候选项目 ${repos.length} 个，进入分析 ${preselected.length} 个`);
+  logger.info(`RepoPulse candidates=${repos.length}, preselected=${preselected.length}`);
 
-  let readmeSuccess = 0;
-  const providerCounts = new Map();
-  const analyses = new Map();
-
-  await mapLimit(preselected, Number(options.concurrency || 3), async (repo) => {
-    const document = await fetchOrReuseDocument({ client, repo, store, logger });
-    if (document.readme_status === "ok") readmeSuccess += 1;
-    const trend = trends.get(String(repo.repo_id)) || { trend_score: 0, source_tags: repo.source_tags || [] };
-    const { provider, analysis } = await analyzeRepo({
-      repo,
-      trend,
-      documents: document,
-      profile,
-      runtimeConfig,
-      noAi: Boolean(options.noAi),
-      logger
-    });
-    providerCounts.set(provider, (providerCounts.get(provider) || 0) + 1);
-    analyses.set(String(repo.repo_id), analysis);
-    store.upsertAnalysis({
-      repo_id: repo.repo_id,
-      full_name: repo.full_name,
-      analysis_date: date,
-      profile_id: profile.profile_id,
-      provider,
-      model: provider === "openai" ? runtimeConfig.openaiModel : "heuristic",
-      input_hash: stableHash(`${document.document_hash}:${JSON.stringify(profile)}:${JSON.stringify(trend)}`),
-      structured_json: analysis,
-      confidence: analysis.confidence?.score || 0,
-      validation_status: "ok",
-      created_at: new Date().toISOString()
-    });
+  const analysisResult = await analyzePreselectedRepos({
+    preselected,
+    trends,
+    client,
+    store,
+    logger,
+    profile,
+    runtimeConfig,
+    date,
+    concurrency,
+    documentTtlHours,
+    noAi: Boolean(options.noAi),
+    analyzeRepoFn
   });
 
   const recentRepoIds = store.getRecentReportRepoIds(profile.profile_id, date, 7);
   const ranked = rankAnalyzedRepos({
     repos: preselected,
-    analyses,
+    analyses: analysisResult.analyses,
     trends,
     profile,
     recentRepoIds,
-    limit: Number(options.limit || profile.daily_limit || 10)
+    referenceDate: date,
+    limit
   });
 
   const stats = {
     candidate_count: repos.length,
-    analyzed_count: preselected.length,
+    analysis_attempted_count: preselected.length,
+    analyzed_count: analysisResult.analyses.size,
+    analysis_failed_count: analysisResult.failures.length,
     recommended_count: ranked.items.length,
-    readme_success_rate: preselected.length ? Math.round((readmeSuccess / preselected.length) * 100) : 0,
-    ai_provider_summary: formatProviderCounts(providerCounts)
+    readme_success_rate: preselected.length ? Math.round((analysisResult.readmeSuccess / preselected.length) * 100) : 0,
+    analysis_success_rate: preselected.length ? Math.round((analysisResult.analyses.size / preselected.length) * 100) : 0,
+    ai_provider_summary: formatProviderCounts(analysisResult.providerCounts),
+    failed_repos: analysisResult.failures
   };
 
   const markdown = renderMarkdownReport({ date, profile, ranked, stats });
@@ -127,7 +133,7 @@ export async function runDailyDigest(options = {}) {
     await store.save();
   }
 
-  logger.info(`日报已生成：${reportPath}`);
+  logger.info(`RepoPulse report generated: ${reportPath}`);
   return {
     date,
     profile,
@@ -138,9 +144,88 @@ export async function runDailyDigest(options = {}) {
   };
 }
 
-async function fetchOrReuseDocument({ client, repo, store, logger }) {
+export async function analyzePreselectedRepos({
+  preselected,
+  trends,
+  client,
+  store,
+  logger = console,
+  profile,
+  runtimeConfig,
+  date,
+  concurrency = 3,
+  documentTtlHours = DEFAULT_DOCUMENT_TTL_HOURS,
+  noAi = false,
+  analyzeRepoFn = analyzeRepo
+}) {
+  let readmeSuccess = 0;
+  const providerCounts = new Map();
+  const analyses = new Map();
+  const failures = [];
+
+  await mapLimit(preselected, concurrency, async (repo) => {
+    try {
+      const document = await fetchOrReuseDocument({ client, repo, store, logger, documentTtlHours });
+      if (document.readme_status === "ok") readmeSuccess += 1;
+
+      const trend = trends.get(String(repo.repo_id)) || { trend_score: 0, source_tags: repo.source_tags || [] };
+      const analysisMode = noAi ? "heuristic" : runtimeConfig.openaiModel || "heuristic";
+      const inputHash = stableHash(`${document.document_hash}:${JSON.stringify(profile)}:${JSON.stringify(trend)}:${analysisMode}`);
+      const cachedAnalysis = store.getAnalysis(repo.repo_id, date, profile.profile_id);
+
+      if (cachedAnalysis?.validation_status === "ok" && cachedAnalysis.input_hash === inputHash && cachedAnalysis.structured_json) {
+        providerCounts.set("cache", (providerCounts.get("cache") || 0) + 1);
+        analyses.set(String(repo.repo_id), cachedAnalysis.structured_json);
+        return;
+      }
+
+      const { provider, analysis } = await analyzeRepoFn({
+        repo,
+        trend,
+        documents: document,
+        profile,
+        runtimeConfig,
+        noAi,
+        referenceDate: date,
+        logger
+      });
+
+      providerCounts.set(provider, (providerCounts.get(provider) || 0) + 1);
+      analyses.set(String(repo.repo_id), analysis);
+      store.upsertAnalysis({
+        repo_id: repo.repo_id,
+        full_name: repo.full_name,
+        analysis_date: date,
+        profile_id: profile.profile_id,
+        provider,
+        model: provider === "openai" ? runtimeConfig.openaiModel : "heuristic",
+        input_hash: inputHash,
+        structured_json: analysis,
+        confidence: analysis.confidence?.score || 0,
+        validation_status: "ok",
+        created_at: new Date().toISOString()
+      });
+    } catch (error) {
+      failures.push({
+        repo_id: repo.repo_id,
+        full_name: repo.full_name,
+        error: error.message
+      });
+      logger.warn?.(`Repo analysis failed ${repo.full_name}: ${error.message}`);
+    }
+  });
+
+  return {
+    readmeSuccess,
+    providerCounts,
+    analyses,
+    failures
+  };
+}
+
+async function fetchOrReuseDocument({ client, repo, store, logger, documentTtlHours = DEFAULT_DOCUMENT_TTL_HOURS }) {
   const existing = store.getDocument(repo.repo_id);
-  if (existing?.readme_text && existing?.last_fetched_at) {
+  if (shouldReuseDocument(existing, repo, { ttlHours: documentTtlHours })) {
     return existing;
   }
   const document = await fetchRepoDocuments({ client, repo, logger });
@@ -149,8 +234,8 @@ async function fetchOrReuseDocument({ client, repo, store, logger }) {
 }
 
 function formatProviderCounts(providerCounts) {
-  if (providerCounts.size === 0) return "无";
+  if (providerCounts.size === 0) return "none";
   return Array.from(providerCounts.entries())
     .map(([provider, count]) => `${provider} ${count}`)
-    .join("，");
+    .join("; ");
 }

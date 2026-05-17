@@ -10,12 +10,13 @@ export async function collectCandidates({
   maxCandidates = 80,
   maxSearchQueries = 10,
   perSearchQuery = 12,
+  sinceDate,
   includeTrending = true,
   logger = console
 }) {
   const [trendingCandidates, searchCandidates, watchlistCandidates] = await Promise.all([
     includeTrending ? collectTrendingCandidates({ client, profile, logger }) : [],
-    collectSearchCandidates({ client, profile, watchlist, logger, maxQueries: maxSearchQueries, perQuery: perSearchQuery }),
+    collectSearchCandidates({ client, profile, watchlist, logger, sinceDate, maxQueries: maxSearchQueries, perQuery: perSearchQuery }),
     collectWatchlistRepos({ client, watchlist, logger })
   ]);
 

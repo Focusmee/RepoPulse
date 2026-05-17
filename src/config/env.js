@@ -9,6 +9,8 @@ export function getRuntimeConfig(env = process.env) {
     openaiApiKey: env.OPENAI_API_KEY || "",
     openaiModel: env.OPENAI_MODEL || "",
     openaiBaseUrl: env.OPENAI_BASE_URL || "https://api.openai.com/v1",
+    openaiTimeoutMs: Number(env.OPENAI_TIMEOUT_MS || 30_000),
+    githubTimeoutMs: Number(env.GITHUB_TIMEOUT_MS || 20_000),
     storePath: env.REPOPULSE_STORE_PATH || "data/repopulse.store.json",
     timeZone: env.REPOPULSE_TIMEZONE || "Asia/Shanghai"
   };

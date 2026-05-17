@@ -4,6 +4,7 @@ import { runDailyDigest } from "./jobs/dailyDigest.js";
 import { getRuntimeConfig } from "./config/env.js";
 import { listProfiles } from "./config/profile.js";
 import { createLogger } from "./shared/logger.js";
+import { parseRunCliOptions } from "./config/options.js";
 
 const args = process.argv.slice(2);
 const command = args[0] || "help";
@@ -11,20 +12,9 @@ const flags = parseFlags(args.slice(1));
 
 try {
   if (command === "run") {
+    const runOptions = parseRunCliOptions(flags);
     await runDailyDigest({
-      profilePath: flags.profile || flags.p || "config/profiles/default.json",
-      watchlistPath: flags.watchlist || "config/watchlist.json",
-      date: flags.date,
-      limit: flags.limit,
-      maxCandidates: flags["max-candidates"],
-      maxAnalyze: flags["max-analyze"],
-      maxSearchQueries: flags["max-search-queries"],
-      perSearchQuery: flags["per-search-query"],
-      outputPath: flags.output,
-      storePath: flags.store,
-      noAi: Boolean(flags["no-ai"]),
-      includeTrending: !flags["no-trending"],
-      dryRun: Boolean(flags["dry-run"]),
+      ...runOptions,
       logger: createLogger({ quiet: Boolean(flags.quiet) })
     });
   } else if (command === "doctor") {

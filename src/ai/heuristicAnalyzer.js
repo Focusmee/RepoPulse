@@ -9,7 +9,7 @@ const ARCH_TERMS = ["architecture", "design", "core", "engine", "runtime", "modu
 const PRACTICAL_TERMS = ["cli", "sdk", "api", "dashboard", "server", "template", "starter", "workflow", "automation", "agent"];
 const TREND_TERMS = ["llm", "agent", "rag", "ai", "workflow", "kubernetes", "database", "observability", "compiler"];
 
-export function analyzeRepoHeuristically({ repo, trend, documents, profile }) {
+export function analyzeRepoHeuristically({ repo, trend, documents, profile, referenceDate }) {
   const readme = documents?.readme_text || "";
   const headings = extractHeadings(readme);
   const text = [repo.description, repo.language, ...(repo.topics || []), readme.slice(0, 6000)].join(" ");
@@ -23,7 +23,7 @@ export function analyzeRepoHeuristically({ repo, trend, documents, profile }) {
   const codeStructureReadability = clamp(35 + countMatches(text, ARCH_TERMS) * 10 + countMatches(text, ["examples", "tests"]) * 8);
   const technicalRepresentativeness = clamp(logScore(repo.stars, 20_000) * 0.45 + countMatches(text, TREND_TERMS) * 12 + (repo.topics?.length || 0) * 2);
   const practicalTransferValue = clamp(30 + countMatches(text, PRACTICAL_TERMS) * 10 + (repo.license ? 12 : 0));
-  const maturitySignal = clamp(logScore(repo.stars, 50_000) * 0.35 + logScore(repo.forks, 10_000) * 0.25 + recencyQuality(repo.pushed_at) * 0.25 + (repo.license ? 15 : 0));
+  const maturitySignal = clamp(logScore(repo.stars, 50_000) * 0.35 + logScore(repo.forks, 10_000) * 0.25 + recencyQuality(repo.pushed_at, referenceDate) * 0.25 + (repo.license ? 15 : 0));
   const profileGoalFit = calculateProfileMatchScore(repo, profile, readme.slice(0, 1500));
   const aiOverallJudgement = average([
     documentationQuality,
@@ -91,7 +91,7 @@ export function analyzeRepoHeuristically({ repo, trend, documents, profile }) {
     },
     recommended_reading_path: buildReadingPath(readme, headings),
     project_idea: buildProjectIdea(repo, profile),
-    risks: buildRisks(repo, readme, confidence),
+    risks: buildRisks(repo, readme, confidence, referenceDate),
     confidence: {
       score: confidence,
       reason: confidence >= 75 ? "README 和元数据较充分" : "上下文有限，建议人工复核关键判断"
@@ -257,11 +257,11 @@ function buildProjectIdea(repo, profile) {
   return `把项目的核心思路整理成学习卡片，和同类项目做一次对比。`;
 }
 
-function buildRisks(repo, readme, confidence) {
+function buildRisks(repo, readme, confidence, referenceDate) {
   const risks = [];
   if (!readme || readme.length < 500) risks.push({ risk: "README 信息偏少，AI 判断依据有限。", severity: "medium" });
   if (!repo.license) risks.push({ risk: "license 未明确，二次开发或商用前需要确认。", severity: "medium" });
-  if (daysBetween(repo.pushed_at) > 180) risks.push({ risk: "近期维护活跃度偏低。", severity: "medium" });
+  if (daysBetween(repo.pushed_at, referenceDate) > 180) risks.push({ risk: "近期维护活跃度偏低。", severity: "medium" });
   if (repo.archived) risks.push({ risk: "仓库已归档，不适合作为活跃技术方向投入。", severity: "high" });
   if (confidence < 60) risks.push({ risk: "分析置信度偏低，需要人工打开仓库复核。", severity: "medium" });
   return risks.length ? risks.slice(0, 4) : [{ risk: "暂未发现明显风险，但仍建议检查 issue 和 release 节奏。", severity: "low" }];
@@ -278,8 +278,8 @@ function confidenceScore(repo, readme) {
   );
 }
 
-function recencyQuality(pushedAt) {
-  const days = daysBetween(pushedAt);
+function recencyQuality(pushedAt, referenceDate) {
+  const days = daysBetween(pushedAt, referenceDate);
   if (days <= 7) return 100;
   if (days <= 30) return 80;
   if (days <= 90) return 55;

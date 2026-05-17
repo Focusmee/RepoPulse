@@ -2,7 +2,7 @@ import { analyzeRepoHeuristically } from "./heuristicAnalyzer.js";
 import { analyzeRepoWithOpenAI } from "./openaiAnalyzer.js";
 import { coerceAnalysis, validateAnalysis } from "./schema.js";
 
-export async function analyzeRepo({ repo, trend, documents, profile, runtimeConfig, noAi = false, logger = console }) {
+export async function analyzeRepo({ repo, trend, documents, profile, runtimeConfig, noAi = false, referenceDate, logger = console }) {
   const input = {
     repo,
     trend,
@@ -21,7 +21,8 @@ export async function analyzeRepo({ repo, trend, documents, profile, runtimeConf
           input,
           apiKey: runtimeConfig.openaiApiKey,
           model: runtimeConfig.openaiModel,
-          baseUrl: runtimeConfig.openaiBaseUrl
+          baseUrl: runtimeConfig.openaiBaseUrl,
+          timeoutMs: runtimeConfig.openaiTimeoutMs
         })
       };
     } catch (error) {
@@ -29,7 +30,7 @@ export async function analyzeRepo({ repo, trend, documents, profile, runtimeConf
     }
   }
 
-  const heuristic = coerceAnalysis(analyzeRepoHeuristically({ repo, trend, documents, profile }));
+  const heuristic = coerceAnalysis(analyzeRepoHeuristically({ repo, trend, documents, profile, referenceDate }));
   const validation = validateAnalysis(heuristic);
   if (!validation.ok) {
     throw new Error(`本地分析输出不符合 schema: ${validation.errors.join("; ")}`);

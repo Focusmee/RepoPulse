@@ -1,12 +1,13 @@
 import { coerceAnalysis, validateAnalysis } from "./schema.js";
 import { buildOpenAIMessages } from "./prompt.js";
+import { fetchWithTimeout } from "../shared/http.js";
 
-export async function analyzeRepoWithOpenAI({ input, apiKey, model, baseUrl = "https://api.openai.com/v1" }) {
+export async function analyzeRepoWithOpenAI({ input, apiKey, model, baseUrl = "https://api.openai.com/v1", timeoutMs = 30_000 }) {
   if (!apiKey || !model) {
     throw new Error("OPENAI_API_KEY 或 OPENAI_MODEL 未设置");
   }
 
-  const response = await fetch(`${baseUrl.replace(/\/$/, "")}/chat/completions`, {
+  const response = await fetchWithTimeout(`${baseUrl.replace(/\/$/, "")}/chat/completions`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${apiKey}`,
@@ -18,6 +19,10 @@ export async function analyzeRepoWithOpenAI({ input, apiKey, model, baseUrl = "h
       response_format: { type: "json_object" },
       messages: buildOpenAIMessages(input)
     })
+  }, {
+    timeoutMs,
+    retries: 1,
+    retryStatuses: [408, 409, 429, 500, 502, 503, 504]
   });
 
   if (!response.ok) {

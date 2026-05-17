@@ -1,11 +1,14 @@
 import { normalizeRepoFromApi } from "./normalize.js";
+import { fetchWithTimeout } from "../shared/http.js";
 
 const GITHUB_API = "https://api.github.com";
 
 export class GitHubClient {
-  constructor({ token = "", userAgent = "RepoPulse/0.1" } = {}) {
+  constructor({ token = "", userAgent = "RepoPulse/0.1", timeoutMs = 20_000, retries = 1 } = {}) {
     this.token = token;
     this.userAgent = userAgent;
+    this.timeoutMs = timeoutMs;
+    this.retries = retries;
   }
 
   async requestJson(path, { query = {}, accept = "application/vnd.github+json" } = {}) {
@@ -16,8 +19,11 @@ export class GitHubClient {
       }
     }
 
-    const response = await fetch(url, {
+    const response = await fetchWithTimeout(url, {
       headers: this.headers(accept)
+    }, {
+      timeoutMs: this.timeoutMs,
+      retries: this.retries
     });
 
     if (!response.ok) {
@@ -30,8 +36,11 @@ export class GitHubClient {
 
   async requestText(urlOrPath, { accept = "text/plain" } = {}) {
     const url = urlOrPath.startsWith("http") ? urlOrPath : `${GITHUB_API}${urlOrPath}`;
-    const response = await fetch(url, {
+    const response = await fetchWithTimeout(url, {
       headers: this.headers(accept)
+    }, {
+      timeoutMs: this.timeoutMs,
+      retries: this.retries
     });
     if (!response.ok) {
       const body = await response.text().catch(() => "");
