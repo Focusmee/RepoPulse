@@ -2,6 +2,7 @@ node_modules/
 .env
 data/*.store.json.tmp
 data/repopulse.store.json
+data/debug-ai/
 !data/.gitkeep
 reports/**/*.md
 !reports/.gitkeep

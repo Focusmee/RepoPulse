@@ -43,7 +43,7 @@ export const LEARNING_DIMENSIONS = [
   }
 ];
 
-export function buildOpenAIMessages(input) {
+export function buildOpenAIMessages(input, { retryMode = false } = {}) {
   return [
     {
       role: "system",
@@ -52,13 +52,18 @@ export function buildOpenAIMessages(input) {
         "你的目标不是复述 GitHub 热度，而是帮助开发者判断一个项目是否值得学习、如何学习、有什么风险。",
         "只允许基于输入中的 repo、trend、documents、user_profile 判断。",
         "如果证据不足，必须降低 confidence.score，并在 risks 中说明不确定性。",
-        "输出必须是严格 JSON，不要输出 Markdown，不要在 JSON 外添加任何文字。"
+        "输出必须是严格 JSON，不要输出 Markdown，不要在 JSON 外添加任何文字。",
+        retryMode
+          ? "这是一次 JSON parse 失败后的重试。请输出更短但完整的严格 JSON：不要代码块、不要注释、不要尾随逗号、不要省略必填字段。"
+          : ""
       ].join("\n")
     },
     {
       role: "user",
       content: JSON.stringify({
-        task: "评估这个 GitHub 仓库是否值得当前用户学习，并按 schema 输出。",
+        task: retryMode
+          ? "上一次模型输出不是合法 JSON。请重新评估这个 GitHub 仓库，并只返回可被 JSON.parse 解析的 JSON 对象。"
+          : "评估这个 GitHub 仓库是否值得当前用户学习，并按 schema 输出。",
         scoring_rubric: {
           score_range: "所有分数都是 0-100 的整数",
           final_learning_score:

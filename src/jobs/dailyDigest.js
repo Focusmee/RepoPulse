@@ -18,6 +18,8 @@ import { ensureDir, writeText } from "../shared/fs.js";
 import { stableHash } from "../shared/text.js";
 import { JsonStore } from "../store/jsonStore.js";
 
+const ANALYSIS_CACHE_VERSION = "ai-debug-recovery-v1";
+
 export async function runDailyDigest(options = {}) {
   const runtimeConfig = options.runtimeConfig || getRuntimeConfig();
   const date = parseDateOption(options.date, "date") || todayString(runtimeConfig.timeZone);
@@ -97,6 +99,7 @@ export async function runDailyDigest(options = {}) {
   const ranked = rankAnalyzedRepos({
     repos: preselected,
     analyses: analysisResult.analyses,
+    analysisMeta: analysisResult.analysisMeta,
     trends,
     profile,
     recentRepoIds,
@@ -114,6 +117,9 @@ export async function runDailyDigest(options = {}) {
     readme_success_rate: preselected.length ? Math.round((analysisResult.readmeSuccess / preselected.length) * 100) : 0,
     analysis_success_rate: preselected.length ? Math.round((analysisResult.analyses.size / preselected.length) * 100) : 0,
     ai_provider_summary: formatProviderCounts(analysisResult.providerCounts),
+    ai_success_count: analysisResult.aiSuccessCount,
+    heuristic_fallback_count: analysisResult.heuristicFallbackCount,
+    ai_failure_type_summary: formatProviderCounts(analysisResult.aiFailureTypeCounts),
     failed_repos: analysisResult.failures
   };
 
@@ -169,6 +175,8 @@ export async function analyzePreselectedRepos({
 }) {
   let readmeSuccess = 0;
   const providerCounts = new Map();
+  const aiFailureTypeCounts = new Map();
+  const analysisMeta = new Map();
   const analyses = new Map();
   const failures = [];
 
@@ -179,16 +187,29 @@ export async function analyzePreselectedRepos({
 
       const trend = trends.get(String(repo.repo_id)) || { trend_score: 0, source_tags: repo.source_tags || [] };
       const analysisMode = noAi ? "heuristic" : runtimeConfig.openaiModel || "heuristic";
-      const inputHash = stableHash(`${document.document_hash}:${JSON.stringify(profile)}:${JSON.stringify(trend)}:${analysisMode}`);
+      const inputHash = stableHash(
+        `${ANALYSIS_CACHE_VERSION}:${document.document_hash}:${JSON.stringify(profile)}:${JSON.stringify(trend)}:${analysisMode}`
+      );
       const cachedAnalysis = store.getAnalysis(repo.repo_id, date, profile.profile_id);
 
       if (cachedAnalysis?.validation_status === "ok" && cachedAnalysis.input_hash === inputHash && cachedAnalysis.structured_json) {
         providerCounts.set("cache", (providerCounts.get("cache") || 0) + 1);
         analyses.set(String(repo.repo_id), cachedAnalysis.structured_json);
+        const meta = {
+          provider: cachedAnalysis.provider || "cache",
+          model: cachedAnalysis.model || "",
+          source: "cache",
+          ai_failure_type: cachedAnalysis.ai_failure_type || "",
+          ai_error: cachedAnalysis.ai_error || "",
+          ai_attempts: Number(cachedAnalysis.ai_attempts || 0),
+          ai_debug_artifacts: cachedAnalysis.ai_debug_artifacts || []
+        };
+        analysisMeta.set(String(repo.repo_id), meta);
+        if (meta.ai_failure_type) incrementMap(aiFailureTypeCounts, meta.ai_failure_type);
         return;
       }
 
-      const { provider, analysis } = await analyzeRepoFn({
+      const { provider, analysis, aiFailure = null, attempts = 1 } = await analyzeRepoFn({
         repo,
         trend,
         documents: document,
@@ -201,6 +222,17 @@ export async function analyzePreselectedRepos({
 
       providerCounts.set(provider, (providerCounts.get(provider) || 0) + 1);
       analyses.set(String(repo.repo_id), analysis);
+      const meta = {
+        provider,
+        model: provider === "openai" ? runtimeConfig.openaiModel : "heuristic",
+        source: "fresh",
+        ai_failure_type: aiFailure?.type || "",
+        ai_error: aiFailure?.message || "",
+        ai_attempts: aiFailure?.attempts || attempts,
+        ai_debug_artifacts: aiFailure?.debug_artifacts || []
+      };
+      analysisMeta.set(String(repo.repo_id), meta);
+      if (meta.ai_failure_type) incrementMap(aiFailureTypeCounts, meta.ai_failure_type);
       store.upsertAnalysis({
         repo_id: repo.repo_id,
         full_name: repo.full_name,
@@ -208,8 +240,13 @@ export async function analyzePreselectedRepos({
         profile_id: profile.profile_id,
         provider,
         model: provider === "openai" ? runtimeConfig.openaiModel : "heuristic",
+        analysis_cache_version: ANALYSIS_CACHE_VERSION,
         input_hash: inputHash,
         structured_json: analysis,
+        ai_failure_type: meta.ai_failure_type,
+        ai_error: meta.ai_error,
+        ai_attempts: meta.ai_attempts,
+        ai_debug_artifacts: meta.ai_debug_artifacts,
         confidence: analysis.confidence?.score || 0,
         validation_status: "ok",
         created_at: new Date().toISOString()
@@ -227,6 +264,10 @@ export async function analyzePreselectedRepos({
   return {
     readmeSuccess,
     providerCounts,
+    aiFailureTypeCounts,
+    analysisMeta,
+    aiSuccessCount: countAnalysisMeta(analysisMeta, (meta) => meta.provider === "openai"),
+    heuristicFallbackCount: countAnalysisMeta(analysisMeta, (meta) => meta.provider === "heuristic" && meta.ai_failure_type),
     analyses,
     failures
   };
@@ -247,4 +288,16 @@ function formatProviderCounts(providerCounts) {
   return Array.from(providerCounts.entries())
     .map(([provider, count]) => `${provider} ${count}`)
     .join("; ");
+}
+
+function incrementMap(map, key) {
+  map.set(key, (map.get(key) || 0) + 1);
+}
+
+function countAnalysisMeta(analysisMeta, predicate) {
+  let count = 0;
+  for (const meta of analysisMeta.values()) {
+    if (predicate(meta)) count += 1;
+  }
+  return count;
 }

@@ -10,10 +10,16 @@ export function getRuntimeConfig(env = process.env) {
     openaiModel: env.OPENAI_MODEL || "",
     openaiBaseUrl: env.OPENAI_BASE_URL || "https://api.openai.com/v1",
     openaiTimeoutMs: Number(env.OPENAI_TIMEOUT_MS || 30_000),
+    debugAi: parseBoolean(env.REPOPULSE_DEBUG_AI),
+    debugAiDir: env.REPOPULSE_DEBUG_DIR || "data/debug-ai",
     githubTimeoutMs: Number(env.GITHUB_TIMEOUT_MS || 20_000),
     storePath: env.REPOPULSE_STORE_PATH || "data/repopulse.store.json",
     timeZone: env.REPOPULSE_TIMEZONE || "Asia/Shanghai"
   };
+}
+
+function parseBoolean(value) {
+  return ["1", "true", "yes", "on"].includes(String(value || "").trim().toLowerCase());
 }
 
 function loadDotEnv(path = ".env") {

@@ -9,6 +9,7 @@ const MAX_DEEP_READ_ITEMS = 3;
 export function rankAnalyzedRepos({
   repos,
   analyses,
+  analysisMeta = new Map(),
   trends,
   profile,
   recentRepoIds = new Set(),
@@ -37,6 +38,7 @@ export function rankAnalyzedRepos({
       return {
         repo,
         analysis,
+        analysis_meta: analysisMeta.get(String(repo.repo_id)) || null,
         trend,
         repo_class: repoClass,
         document_status: summarizeDocumentStatus(documents.get(String(repo.repo_id))),

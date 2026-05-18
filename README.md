@@ -48,12 +48,23 @@ data/repopulse.store.json
 $env:GITHUB_TOKEN="你的 GitHub Token"
 $env:OPENAI_API_KEY="你的 OpenAI Key"
 $env:OPENAI_MODEL="你的模型名"
+$env:OPENAI_TIMEOUT_MS="60000"
 npm run report
 ```
 
 `GITHUB_TOKEN` 推荐设置，否则 GitHub API 限流较低。
 
 `OPENAI_API_KEY` 和 `OPENAI_MODEL` 都设置时，RepoPulse 会尝试 AI 分析；没有设置或调用失败时，会自动降级为本地规则分析。
+
+调试模型坏 JSON 或 OpenAI-compatible provider 时可以临时打开：
+
+```powershell
+$env:REPOPULSE_DEBUG_AI="1"
+$env:REPOPULSE_DEBUG_DIR="data/debug-ai"
+npm run report -- --profile config/profiles/ai-builder.json --max-candidates 20 --max-analyze 3 --limit 3
+```
+
+失败上下文会写入 `data/debug-ai`，日报也会显示 AI 成功数、heuristic 降级数和失败类型分布。
 
 更完整的配置、prompt 优化、评分明细和人工评测流程见：
 

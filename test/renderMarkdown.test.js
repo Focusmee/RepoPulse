@@ -31,6 +31,13 @@ test("markdown renderer escapes untrusted repo and analysis text", () => {
             trend_score: 20,
             profile_match_score: 80
           },
+          analysis_meta: {
+            provider: "heuristic",
+            model: "heuristic",
+            ai_failure_type: "parse_error",
+            ai_attempts: 2,
+            ai_debug_artifacts: ["data/debug-ai/demo-attempt-1-parse_error.json", "data/debug-ai/demo-attempt-2-schema_error.json"]
+          },
           analysis: {
             summary: "<img src=x>",
             learning_value: {
@@ -52,13 +59,21 @@ test("markdown renderer escapes untrusted repo and analysis text", () => {
       recommended_count: 1,
       readme_success_rate: 100,
       analysis_success_rate: 100,
-      ai_provider_summary: "heuristic 1"
+      ai_provider_summary: "heuristic 1",
+      ai_success_count: 0,
+      heuristic_fallback_count: 1,
+      ai_failure_type_summary: "parse_error 1"
     }
   });
 
   assert.ok(markdown.includes("&lt;script&gt;"));
   assert.ok(markdown.includes("&lt;img src=x&gt;"));
   assert.ok(markdown.includes("事实来源"));
+  assert.ok(markdown.includes("AI 成功数：0"));
+  assert.ok(markdown.includes("heuristic 降级数：1"));
+  assert.ok(markdown.includes("AI 失败类型分布：parse_error 1"));
+  assert.ok(markdown.includes("分析方式：heuristic 降级（AI 失败类型：parse_error"));
+  assert.ok(markdown.includes("data/debug-ai/demo-attempt-1-parse_error.json、data/debug-ai/demo-attempt-2-schema_error.json"));
   assert.ok(markdown.includes("判断：&lt;b&gt;good&lt;/b&gt;；证据：README"));
   assert.ok(markdown.includes("low：&lt;risk&gt;"));
   assert.equal(markdown.includes("<script>"), false);

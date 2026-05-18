@@ -47,6 +47,9 @@ function renderStats(stats) {
     `- README 成功率：${stats.readme_success_rate}%`,
     `- 分析成功率：${stats.analysis_success_rate ?? 100}%`,
     `- AI/规则分析：${text(stats.ai_provider_summary)}`,
+    `- AI 成功数：${Number(stats.ai_success_count || 0)}`,
+    `- heuristic 降级数：${Number(stats.heuristic_fallback_count || 0)}`,
+    `- AI 失败类型分布：${text(stats.ai_failure_type_summary || "none")}`,
     `- 质量警告：${Number(stats.quality_warning_count || 0)}`,
     stats.analysis_failed_count ? `- 单项目失败：${stats.analysis_failed_count}` : null,
     ""
@@ -67,6 +70,7 @@ function renderItem(item, index, profile) {
     "",
     `- 一句话定位：${text(analysis.summary)}`,
     `- 推荐等级：${text(item.recommendation_level || recommendationLevel(scores.personalized_score))}`,
+    renderAnalysisMode(item.analysis_meta),
     `- 项目类型：${text(item.repo_class?.label || "未分类")}；${text(item.repo_class?.reason || "")}`,
     `- 综合分：${scores.personalized_score}；学习价值：${scores.learning_score}；热度：${scores.trend_score}；画像匹配：${scores.profile_match_score}`,
     `- 置信度：${round(Number(analysis.confidence?.score || 0), 1)}；${text(analysis.confidence?.reason || "未提供置信度说明")}`,
@@ -82,6 +86,23 @@ function renderItem(item, index, profile) {
   ]
     .filter(Boolean)
     .join("\n");
+}
+
+function renderAnalysisMode(meta) {
+  if (!meta) return null;
+  if (meta.provider === "heuristic" && meta.ai_failure_type) {
+    const debugText = renderDebugArtifacts(meta.ai_debug_artifacts);
+    return `- 分析方式：heuristic 降级（AI 失败类型：${text(meta.ai_failure_type)}；尝试 ${Number(meta.ai_attempts || 1)} 次${debugText}）`;
+  }
+  if (meta.provider === "heuristic") return "- 分析方式：heuristic";
+  if (meta.provider === "openai") return `- 分析方式：openai${meta.model ? `（${text(meta.model)}）` : ""}${meta.source === "cache" ? "；cache" : ""}`;
+  return `- 分析方式：${text(meta.provider)}`;
+}
+
+function renderDebugArtifacts(paths = []) {
+  const values = paths.filter(Boolean);
+  if (!values.length) return "";
+  return `；debug：${values.map(text).join("、")}`;
 }
 
 function renderLearningBreakdown(breakdown = []) {
