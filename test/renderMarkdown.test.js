@@ -58,6 +58,9 @@ test("markdown renderer escapes untrusted repo and analysis text", () => {
 
   assert.ok(markdown.includes("&lt;script&gt;"));
   assert.ok(markdown.includes("&lt;img src=x&gt;"));
+  assert.ok(markdown.includes("事实来源"));
+  assert.ok(markdown.includes("判断：&lt;b&gt;good&lt;/b&gt;；证据：README"));
+  assert.ok(markdown.includes("low：&lt;risk&gt;"));
   assert.equal(markdown.includes("<script>"), false);
   assert.equal(markdown.includes("<img src=x>"), false);
 });

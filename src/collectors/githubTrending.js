@@ -56,12 +56,46 @@ export function parseTrendingFullNames(html) {
   let match;
   while ((match = regex.exec(html))) {
     const fullName = match[1].replace(/\s/g, "");
+    if (!isLikelyRepoFullName(fullName)) continue;
     if (!seen.has(fullName.toLowerCase())) {
       seen.add(fullName.toLowerCase());
       result.push(fullName);
     }
   }
   return result;
+}
+
+function isLikelyRepoFullName(fullName) {
+  const [owner, name, extra] = String(fullName || "").split("/");
+  if (!owner || !name || extra) return false;
+
+  const blockedOwners = new Set([
+    "about",
+    "apps",
+    "collections",
+    "customer-stories",
+    "enterprise",
+    "events",
+    "explore",
+    "features",
+    "github",
+    "login",
+    "marketplace",
+    "new",
+    "notifications",
+    "orgs",
+    "pricing",
+    "pulls",
+    "search",
+    "settings",
+    "signup",
+    "sponsors",
+    "topics",
+    "trending"
+  ]);
+
+  if (blockedOwners.has(owner.toLowerCase())) return false;
+  return /^[A-Za-z0-9_.-]+$/.test(owner) && /^[A-Za-z0-9_.-]+$/.test(name);
 }
 
 function trendingUrl(language, since) {

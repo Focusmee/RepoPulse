@@ -10,6 +10,7 @@ import { analyzeRepo } from "../ai/analyzer.js";
 import { preselectRepos } from "../rankers/preselector.js";
 import { rankAnalyzedRepos } from "../rankers/personalizedRanker.js";
 import { renderMarkdownReport } from "../reports/renderMarkdown.js";
+import { checkReportQuality } from "../reports/qualityCheck.js";
 import { buildSnapshots, calculateTrendScores } from "../scorers/trendScorer.js";
 import { mapLimit } from "../shared/async.js";
 import { addDays, todayString } from "../shared/date.js";
@@ -100,7 +101,8 @@ export async function runDailyDigest(options = {}) {
     profile,
     recentRepoIds,
     referenceDate: date,
-    limit
+    limit,
+    documents: new Map(preselected.map((repo) => [String(repo.repo_id), store.getDocument(repo.repo_id)]))
   });
 
   const stats = {
@@ -114,6 +116,13 @@ export async function runDailyDigest(options = {}) {
     ai_provider_summary: formatProviderCounts(analysisResult.providerCounts),
     failed_repos: analysisResult.failures
   };
+
+  const quality = checkReportQuality({ ranked });
+  stats.quality_warning_count = quality.warning_count;
+  stats.quality_warnings = quality.warnings;
+  for (const warning of quality.warnings) {
+    logger.warn?.(`RepoPulse quality ${warning.level} ${warning.repo || "report"}: ${warning.message}`);
+  }
 
   const markdown = renderMarkdownReport({ date, profile, ranked, stats });
   const reportPath = options.outputPath || join("reports", date.slice(0, 4), `${date}-${profile.profile_id}.md`);
