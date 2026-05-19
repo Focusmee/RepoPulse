@@ -78,6 +78,7 @@ docs/10-配置与推荐可信度提升指南.md
 npm run doctor
 npm run profiles
 npm run report -- --profile config/profiles/ai-builder.json --limit 8
+npm run brief -- --input reports/2026/2026-05-19-ai-builder.md --output outputs/brief/2026-05-19-ai-builder.html
 npm run report -- --no-ai --max-candidates 40 --max-analyze 12
 ```
 
@@ -97,6 +98,19 @@ npm run report -- --no-ai --max-candidates 40 --max-analyze 12
 }
 ```
 
+### 画像用途
+
+当前内置画像分为产品变现和多平台推广两类：
+
+| 画像 | 用途 | 推荐场景 |
+| --- | --- | --- |
+| `ai-builder` | 核心付费画像 | 面向 AI 应用开发者 / 独立开发者的 AI Builder Radar |
+| `ai-career-builder` | 求职转型画像 | 小红书、抖音、B 站等内容中展示 AI 简历项目和学习路径 |
+| `ai-product-operator` | 产品运营画像 | 面向产品、运营、增长岗位，强调可落地工具和业务效率 |
+| `industry-ai-explorer` | 泛行业获客画像 | 面向想用 AI 改造业务的人，强调行业应用机会和外包/合作方向 |
+| `default` | 通用开发者画像 | 本地默认运行和回归验证 |
+| `java-backend` | Java 后端画像 | Java / 分布式 / 后端求职与架构学习 |
+
 ## Watchlist
 
 `config/watchlist.json` 用于补充你长期关注的 topic、keyword 或指定仓库。
@@ -108,6 +122,16 @@ npm run report -- --no-ai --max-candidates 40 --max-analyze 12
   "repos": ["owner/name"]
 }
 ```
+
+## 精华版 HTML
+
+用于试读、推广和私信成交时，可以把完整 Markdown 日报压缩成 5 分钟可读的 HTML 精华版：
+
+```bash
+npm run brief -- --input reports/2026/2026-05-19-ai-builder.md --output outputs/brief/2026-05-19-ai-builder.html
+```
+
+精华版只保留 Top 3 深读项目和最多 2 个项目灵感，突出“是否值得点开、为什么值得看、最大风险、推荐动作”。HTML 内置打印样式，可先通过浏览器打印为 PDF；首版不引入自动 PDF 依赖。
 
 ## 项目结构
 

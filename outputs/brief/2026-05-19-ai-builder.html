@@ -1,0 +1,618 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RepoPulse 日报 - 2026-05-19</title>
+  <style>
+
+:root {
+  color-scheme: light;
+  --text-primary: #172033;
+  --text-secondary: #667085;
+  --text-tertiary: #8a94a6;
+  --surface: #ffffff;
+  --surface-soft: #f6f8fb;
+  --surface-tint: #eef4ff;
+  --border: #d9e1ec;
+  --border-strong: #bac6d5;
+  --accent-action: #2563eb;
+  --accent-opportunity: #0f766e;
+  --accent-risk: #b45309;
+  --accent-ink: #111827;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", Arial, sans-serif;
+  color: var(--text-primary);
+  background: var(--surface-soft);
+}
+a { color: var(--accent-action); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.page { max-width: 1080px; margin: 0 auto; padding: 28px; }
+.issue-header, .project-card, .mini-card, .cta {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.issue-header {
+  padding: 30px;
+  border-top: 6px solid var(--accent-action);
+}
+.brand-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--border);
+}
+.brand-name {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--accent-ink);
+}
+.brand-divider { color: var(--text-tertiary); }
+.product-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--accent-action);
+}
+.issue-date {
+  margin-left: auto;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 700;
+}
+.hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(300px, .95fr);
+  gap: 22px;
+  align-items: stretch;
+  margin-top: 24px;
+}
+.kicker, .cta-label {
+  margin: 0 0 8px;
+  color: var(--accent-opportunity);
+  font-size: 13px;
+  font-weight: 800;
+}
+h1 {
+  margin: 0;
+  font-size: 34px;
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+h2 {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.3;
+  letter-spacing: 0;
+}
+h3 {
+  margin: 0;
+  font-size: 20px;
+  line-height: 1.35;
+  letter-spacing: 0;
+}
+h4 {
+  margin: 0 0 8px;
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--text-secondary);
+  letter-spacing: 0;
+}
+.profile {
+  margin: 14px 0 0;
+  color: var(--text-secondary);
+  line-height: 1.75;
+}
+.insight-panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent-action);
+  border-radius: 8px;
+  background: var(--surface-tint);
+}
+.insight-panel span {
+  color: var(--accent-action);
+  font-size: 13px;
+  font-weight: 800;
+}
+.insight-panel p {
+  margin: 8px 0 0;
+  color: var(--text-primary);
+  font-size: 17px;
+  line-height: 1.72;
+  font-weight: 700;
+}
+.metric-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 24px;
+}
+.metric-card {
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-soft);
+}
+.metric-card strong {
+  display: block;
+  font-size: 26px;
+  line-height: 1.1;
+  color: var(--accent-ink);
+}
+.metric-card span {
+  display: block;
+  margin-top: 6px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+.section { margin: 28px 0; }
+.section-header {
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  gap: 14px;
+  align-items: start;
+  margin-bottom: 14px;
+}
+.section-index {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-weight: 800;
+}
+.section-note {
+  margin: 6px 0 0;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+.project-card {
+  margin: 16px 0;
+  padding: 22px;
+}
+.project-top {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: start;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--border);
+}
+.rank-block {
+  display: grid;
+  gap: 4px;
+  color: var(--text-secondary);
+}
+.rank-block span {
+  font-size: 28px;
+  line-height: 1;
+  font-weight: 900;
+  color: var(--accent-action);
+}
+.rank-block small {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+.summary {
+  margin: 8px 0 0;
+  color: var(--text-secondary);
+  line-height: 1.65;
+}
+.project-meta {
+  display: flex;
+  max-width: 260px;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.meta-pill {
+  display: inline-flex;
+  min-height: 28px;
+  align-items: center;
+  padding: 0 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  background: var(--surface-soft);
+  font-size: 12px;
+  font-weight: 800;
+}
+.meta-pill.action { color: var(--accent-action); border-color: #bfd3ff; background: #f3f7ff; }
+.meta-pill.cost { color: var(--accent-opportunity); border-color: #b7e2d7; background: #f0fdfa; }
+.meta-pill.risk { color: var(--accent-risk); border-color: #f0d2a4; background: #fff8ed; }
+.verdict-panel {
+  margin-top: 18px;
+  padding: 14px 16px;
+  border-left: 4px solid var(--accent-action);
+  background: #f7faff;
+}
+.verdict-panel span, .idea-panel span {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 800;
+}
+.verdict-panel p, .idea-panel p {
+  margin: 0;
+  color: var(--text-primary);
+  line-height: 1.72;
+  font-weight: 700;
+}
+.narrative-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+.narrative-block {
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-soft);
+}
+.narrative-block.example {
+  border-left: 4px solid var(--accent-opportunity);
+  background: #f7fcfa;
+}
+.narrative-block p {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.72;
+}
+.decision-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+.decision-cell {
+  padding: 14px;
+  border-top: 3px solid var(--border-strong);
+  background: var(--surface);
+}
+.decision-cell.action { border-top-color: var(--accent-action); }
+.decision-cell.opportunity { border-top-color: var(--accent-opportunity); }
+.decision-cell.risk { border-top-color: var(--accent-risk); }
+.decision-cell ul {
+  margin: 0;
+  padding-left: 18px;
+}
+.decision-cell li {
+  margin: 7px 0;
+  color: var(--text-secondary);
+  line-height: 1.65;
+}
+.decision-cell.risk li { color: #8a4b0f; }
+.idea-panel {
+  margin-top: 14px;
+  padding: 15px 16px;
+  border: 1px solid #b7e2d7;
+  border-left: 4px solid var(--accent-opportunity);
+  border-radius: 8px;
+  background: #f0fdfa;
+}
+.inspiration-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.mini-card {
+  padding: 18px;
+}
+.mini-card p {
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+.mini-card .decision-cell {
+  margin-top: 12px;
+  padding: 0;
+  background: transparent;
+}
+.cta {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: center;
+  padding: 24px;
+  margin: 30px 0;
+  border-left: 4px solid var(--accent-action);
+}
+.cta h2 { margin-top: 0; }
+.cta p {
+  margin: 8px 0 0;
+  color: var(--text-secondary);
+  line-height: 1.75;
+}
+.cta-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.button, .secondary {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  padding: 0 16px;
+  border-radius: 8px;
+  font-weight: 800;
+}
+.button {
+  background: var(--accent-action);
+  color: #fff;
+}
+.button:hover { text-decoration: none; }
+.button.muted {
+  background: #e9eef6;
+  color: var(--text-primary);
+}
+.secondary {
+  border: 1px solid var(--border);
+  color: var(--accent-action);
+  background: var(--surface);
+}
+.empty { color: var(--text-secondary); }
+@media (max-width: 820px) {
+  .page { padding: 14px; }
+  .issue-header, .project-card, .mini-card, .cta { padding: 18px; }
+  .hero-grid, .metric-strip, .narrative-grid, .decision-grid, .inspiration-grid, .cta {
+    grid-template-columns: 1fr;
+  }
+  .issue-date { margin-left: 0; width: 100%; }
+  h1 { font-size: 28px; }
+  h2 { font-size: 21px; }
+  .project-top {
+    grid-template-columns: 46px minmax(0, 1fr);
+  }
+  .project-meta {
+    grid-column: 1 / -1;
+    max-width: none;
+    justify-content: flex-start;
+  }
+  .cta-actions { justify-content: flex-start; }
+}
+@media print {
+  body { background: #fff; }
+  .page { max-width: none; padding: 0; }
+  .issue-header, .project-card, .mini-card, .cta {
+    box-shadow: none;
+    break-inside: avoid;
+  }
+  .project-card { page-break-inside: avoid; }
+  a { color: #111827; text-decoration: underline; }
+}
+
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="issue-header">
+      <div class="brand-row">
+        <span class="brand-name">RepoPulse</span>
+        <span class="brand-divider">/</span>
+        <span class="product-name">AI Builder Radar</span>
+        <span class="issue-date">2026-05-19</span>
+      </div>
+      <div class="hero-grid">
+        <div class="issue-title">
+          <p class="kicker">GitHub 项目情报简报</p>
+          <h1>RepoPulse 日报 - 2026-05-19</h1>
+          <p class="profile">画像：AI 应用开发者 / 独立开发者；偏好语言：TypeScript、Python；关注方向：agent、rag、mcp、ai-agents、developer-tools、workflow、automation、llm</p>
+        </div>
+        <aside class="insight-panel"><span>今日主判断</span><p>今天更值得关注的方向是：ai-agents(3)、python(2)、claude(2)、claude-code(2)、ai-agent(2)。推荐优先看学习价值高、和画像匹配强、阅读路径清晰的项目。</p></aside>
+      </div>
+      <div class="metric-strip"><div class="metric-card">
+        <strong>80</strong>
+        <span>候选项目</span>
+      </div><div class="metric-card">
+        <strong>20</strong>
+        <span>分析成功</span>
+      </div><div class="metric-card">
+        <strong>8</strong>
+        <span>最终推荐</span>
+      </div><div class="metric-card">
+        <strong>3</strong>
+        <span>质量警告</span>
+      </div></div>
+    </section>
+
+    <section class="section">
+      <div class="section-header">
+        <span class="section-index">01</span>
+        <div>
+          <h2>Top 3 值得点开的项目</h2>
+          <p class="section-note">先看结论，再看场景、风险和下一步动作。目标是在 30 秒内判断是否值得打开仓库。</p>
+        </div>
+      </div>
+      <article class="project-card">
+    <header class="project-top">
+      <div class="rank-block">
+        <span>01</span>
+        <small>Top Pick</small>
+      </div>
+      <div class="project-title">
+        <h3><a href="https://github.com/CloakHQ/CloakBrowser">CloakHQ/CloakBrowser</a></h3>
+        <p class="summary">基于源码级修改的隐形 Chromium，通过所有 bot 检测，Playwright 无缝替代。</p>
+      </div>
+      <div class="project-meta">
+        <span class="meta-pill action">强推荐</span>
+        <span class="meta-pill cost">低成本</span>
+        <span class="meta-pill risk">中风险</span>
+      </div>
+    </header>
+
+    <div class="verdict-panel"><span>是否值得点开</span><p>建议点开深读：提供从源码层解决机器人检测的完整方案，技术含量高、实用性强。</p></div>
+
+    <div class="narrative-grid">
+      <section class="narrative-block"><h4>项目背景与使用场景</h4><p>CloakBrowser 是一个自定义编译的 Chromium 浏览器，通过修改 C++ 源码中的指纹特征（如 Canvas、WebGL、音频、GPU 等），在网站检测系统面前表现为普通浏览器，从而绕过反机器人检测。它提供与 Playwright 和 Puppeteer 相同的 API，开发者无需学习新工具，只需更换导入即可获得隐形能力。适用于需要大规模网…</p></section>
+      <section class="narrative-block example"><h4>简单例子</h4><p>开发者使用 AI 代理（如 browser-use）提取网页信息，目标站点有 Cloudflare Turnstile 防护。将 browser-use 的浏览器引擎从普通 Playwright 替换为 CloakBrowser，仅需修改一行导入，即可让代理无阻碍地浏览页面，成功提取数据，无需额外处理验证码。</p></section>
+    </div>
+
+    <div class="decision-grid">
+      <section class="decision-cell action">
+    <h4>为什么值得看</h4>
+    <ul><li>判断：提供从源码层解决机器人检测的完整方案，技术含量高、实用性强。；证据：README 列出 49 个 C++ 补丁，30+ 检测网站测试通过，包括 Cloudflare Turnstile 和 reCAPTCHA v3 0.9 分。</li><li>判断：与现有工具链（Playwright）无缝兼容，即时可迁移，学习成本极低。；证据：README 展示一行代码替换 Playwright 导入，API 完全一致，humanize=True 一键模拟人类行为。</li><li>趋势信号：1 日增星 4336；来源 github_trending:weekly、github_trending:daily:python、github_trending:daily</li></ul>
+  </section>
+      <section class="decision-cell opportunity">
+    <h4>能学习到什么</h4>
+    <ul><li>如何通过修改浏览器源码实现反检测</li><li>将自定义二进制与 Playwright 集成的方法</li><li>在 AI 代理中集成隐形浏览器的实践模式</li></ul>
+  </section>
+      <section class="decision-cell risk">
+    <h4>最大风险</h4>
+    <ul><li>中风险：依赖自定义二进制，平台更新可能不同步（当前 macOS 仍用 Chromium 145），可能导致检测通过率下降。</li><li>中风险：自动下载的二进制文件虽提供校验和与 VirusTotal 链接，但仍存在供应链攻击风险，生产环境使用需自行审计。</li></ul>
+  </section>
+      <section class="decision-cell action">
+    <h4>下一步动作</h4>
+    <ul><li>执行 `docker run --rm cloakhq/cloakbrowser cloaktest`，目标：快速验证反检测效果，无需安装</li><li>阅读 README 的“How It Works”和“API”部分，目标：理解核心原理和简单用法</li></ul>
+  </section>
+    </div>
+
+    <div class="idea-panel"><span>可转化项目想法</span><p>可转化为“隐形 AI 网页数据抓取器”服务，结合 LangChain 或 browser-use，提供 API 接口，作为 SaaS 或内部工具，成为简历亮点。</p></div>
+  </article>
+<article class="project-card">
+    <header class="project-top">
+      <div class="rank-block">
+        <span>02</span>
+        <small>Top Pick</small>
+      </div>
+      <div class="project-title">
+        <h3><a href="https://github.com/Imbad0202/academic-research-skills">Imbad0202/academic-research-skills</a></h3>
+        <p class="summary">Claude Code 学术研究自动化管道：研究→撰写→评审→修订→定稿</p>
+      </div>
+      <div class="project-meta">
+        <span class="meta-pill action">强推荐</span>
+        <span class="meta-pill cost">中等成本</span>
+        <span class="meta-pill risk">中风险</span>
+      </div>
+    </header>
+
+    <div class="verdict-panel"><span>是否值得点开</span><p>建议点开深读：流水线架构清晰，文档全面，可快速学习多智能体协同设计。</p></div>
+
+    <div class="narrative-grid">
+      <section class="narrative-block"><h4>项目背景与使用场景</h4><p>该项目为 Claude Code 提供了一套学术研究技能集，覆盖从文献调研、论文撰写到同行评审的全流程。它不是替代研究者，而是作为辅助工具，处理文献检索、格式排版、数据核验、逻辑一致性等机械工作，让研究者专注于核心思考。通过内置的完整性检查门禁（如引用真实性验证、统计错误检测）和“人在回路”设计，有效降低 AI 生成内容中的幻觉风险。适合研究生、科研人员及…</p></section>
+      <section class="narrative-block example"><h4>简单例子</h4><p>一位硕士生用 `/ars-plan` 对话式规划论文结构，接着用 `/ars-lit-review` 进行文献综述，用 `/ars-write` 撰写各章节，最后用 `/ars-review` 模拟同行评审。流水线在过程中自动检测出伪造引用和统计错误，确保论文质量。</p></section>
+    </div>
+
+    <div class="decision-grid">
+      <section class="decision-cell action">
+    <h4>为什么值得看</h4>
+    <ul><li>判断：流水线架构清晰，文档全面，可快速学习多智能体协同设计。；证据：README 中的架构文档和管道流程图，以及展示的 PDF 产物。</li><li>判断：针对 AI 幻觉的完整性校验模式（L3 锚定、声明审计）具有创新性和可复刻性。；证据：v3.8 增加的 CLAIM_AUDIT 和 L3 锚定方案，README 中详细解释。</li><li>趋势信号：1 日增星 3508；来源 github_trending:weekly、github_trending:daily、github_trending:daily:python</li></ul>
+  </section>
+      <section class="decision-cell opportunity">
+    <h4>能学习到什么</h4>
+    <ul><li>可复刻的学术 AI 管道架构与多智能体协同设计</li><li>引用真实性验证的 L3 锚定与声明审计方案</li><li>人在回路的完整性门禁模式与失败模式阻断清单</li></ul>
+  </section>
+      <section class="decision-cell risk">
+    <h4>最大风险</h4>
+    <ul><li>中风险：许可证限制（CC BY-NC 4.0）禁止商业使用，若用户希望产品化则受限。</li><li>低风险：工具链依赖：项目仅适用于 Claude Code，若用户未使用该工具或未来切换，学习价值下降。</li></ul>
+  </section>
+      <section class="decision-cell action">
+    <h4>下一步动作</h4>
+    <ul><li>阅读 README 的架构部分及 docs/ARCHITECTURE.md，把握全管道设计。，目标：理解 10 阶段管道和技能依赖图</li><li>安装 Claude Code 并运行 `/ars-plan` 示例，体验对话式规划。，目标：直观感受交互模式与输出质量</li></ul>
+  </section>
+    </div>
+
+    <div class="idea-panel"><span>可转化项目想法</span><p>将学术研究管道模式迁移到技术文档审查场景：构建一个“技术博客／文档审查助手”，集成完整性检查（如代码片段验证、链接有效性）和风格校准，可作为一个开源工具或简历项目。</p></div>
+  </article>
+<article class="project-card">
+    <header class="project-top">
+      <div class="rank-block">
+        <span>03</span>
+        <small>Top Pick</small>
+      </div>
+      <div class="project-title">
+        <h3><a href="https://github.com/ZhuLinsen/daily_stock_analysis">ZhuLinsen/daily_stock_analysis</a></h3>
+        <p class="summary">LLM驱动的股票智能分析系统，自动生成多市场分析报告并推送到多渠道，零成本部署。</p>
+      </div>
+      <div class="project-meta">
+        <span class="meta-pill action">值得观察</span>
+        <span class="meta-pill cost">中等成本</span>
+        <span class="meta-pill risk">中风险</span>
+      </div>
+    </header>
+
+    <div class="verdict-panel"><span>是否值得点开</span><p>可以先扫一眼 README：依赖多个第三方API，若某服务停止免费或失效，可能导致部分功能不可用（如新闻搜索服务变动）。</p></div>
+
+    <div class="narrative-grid">
+      <section class="narrative-block"><h4>项目背景与使用场景</h4><p>这是一个基于大模型的个人股票分析工具，通过连接多个金融数据源和AI模型，自动获取自选股行情、新闻、技术指标，然后让LLM生成包含评分、趋势、买卖建议和风险提醒的决策报告，最后通过企业微信、飞书、Telegram等渠道推送。它利用GitHub Actions实现零成本定时运行，无需服务器，非常适合AI应用开发者和想快速搭建AI分析助手的用户。</p></section>
+      <section class="narrative-block example"><h4>简单例子</h4><p>一位开发者想监测自己关注的A股组合，Fork本仓库后在GitHub Secrets中填入Anspire API Key和股票代码，启用Actions后每个工作日18:00自动收到LLM生成的分析报告，内含每只股票的评分、资金流向、催化因素和风险警报，可直接替代手动浏览行情软件。</p></section>
+    </div>
+
+    <div class="decision-grid">
+      <section class="decision-cell action">
+    <h4>为什么值得看</h4>
+    <ul><li>判断：文档详尽，5分钟即可跑通，降低了学习门槛。；证据：README提供GitHub Actions快速部署步骤，可直接手动测试。</li><li>判断：集成多个AI模型与数据源，展示了LLM应用的工程实践。；证据：支持Anspire、AIHubMix、Gemini、OpenAI等模型，以及AkShare、SerpAPI等数据源。</li><li>趋势信号：来源 github_trending:daily、github_trending:daily:python</li></ul>
+  </section>
+      <section class="decision-cell opportunity">
+    <h4>能学习到什么</h4>
+    <ul><li>如何设计一个LLM驱动的多数据源分析流水线，从数据采集、提示词构建到报告生成。</li><li>如何集成多个AI模型接口（如Anspire、OpenAI兼容）和通知渠道，实现高可用。</li><li>如何使用GitHub Actions实现零成本、无需服务器的定时任务调度。</li></ul>
+  </section>
+      <section class="decision-cell risk">
+    <h4>最大风险</h4>
+    <ul><li>中风险：依赖多个第三方API，若某服务停止免费或失效，可能导致部分功能不可用（如新闻搜索服务变动）。</li><li>低风险：金融数据源可能受到合规限制，二次分发分析报告需注意可能的信息服务条款。</li></ul>
+  </section>
+      <section class="decision-cell action">
+    <h4>下一步动作</h4>
+    <ul><li>阅读README的“快速开始-方式一：GitHub Actions”，并Fork仓库。，目标：获得可运行的副本，了解核心部署流程。</li><li>配置Secrets（推荐填入ANSPIRE_API_KEYS和STOCK_LIST），手动触发一次Actions流水线。，目标：验证系统能生成分析报告并推送到指定渠道，获得直观体验。</li></ul>
+  </section>
+    </div>
+
+    <div class="idea-panel"><span>可转化项目想法</span><p>将分析报告改造为个人股票决策助手，每日汇总到Notion，或提取核心评分数据做回测；也可衍生为加密货币或商品市场的AI分析工具，快速构建SaaS原型。</p></div>
+  </article>
+    </section>
+
+    <section class="section">
+    <div class="section-header">
+      <span class="section-index">02</span>
+      <div>
+        <h2>可转化为项目灵感</h2>
+        <p class="section-note">适合后续做 demo、内容选题或产品假设的小机会。</p>
+      </div>
+    </div>
+    <div class="inspiration-grid">
+      <article class="mini-card">
+    <h3><a href="https://github.com/microsoft/ai-agents-for-beginners">microsoft/ai-agents-for-beginners</a></h3>
+    <p>构建一个基于多 agent 的自动化研究助手：使用 Agentic RAG 检索知识库，结合工具调用发送邮件或更新看板，部署为 Slack Bot，可作为简历项目。</p>
+    <section class="decision-cell risk compact">
+    <h4>风险</h4>
+    <ul><li>中风险：示例集合 不默认等同于生产级工程，建议优先作为灵感或复刻素材。</li><li>中风险：课程依赖 Azure AI Foundry Agent Service V2，需要 Azure 账号，可能产生费用；虽然支持 OpenAI 兼容服务，但部分功能可能受限。</li></ul>
+  </section>
+  </article>
+<article class="mini-card">
+    <h3><a href="https://github.com/Shubhamsaboo/awesome-llm-apps">Shubhamsaboo/awesome-llm-apps</a></h3>
+    <p>基于此模板构建一个「AI 竞品情报分析代理团队」，自动爬取竞争对手动态、生成分析报告并发送邮件，可作为简历项目或 SaaS 产品 MVP，展现多智能体协作和 RAG 能力。</p>
+    <section class="decision-cell risk compact">
+    <h4>风险</h4>
+    <ul><li>中风险：资源合集 不默认等同于生产级工程，建议优先作为灵感或复刻素材。</li><li>低风险：部分模板依赖开源框架（如 CrewAI、AG2）可能停止维护，导致未来不可用</li></ul>
+  </section>
+  </article>
+    </div>
+  </section>
+
+    <section class="cta">
+      <div>
+        <span class="cta-label">Subscription</span>
+        <h2>想持续收到 AI Builder Radar？</h2>
+        <p>每期从 GitHub 项目里筛出值得 AI 应用开发者点开、学习或复刻的机会，并给出风险和下一步动作。</p>
+      </div>
+      <div class="cta-actions">
+        <span class="button muted">申请试读 / 订阅 AI Builder Radar</span>
+        
+      </div>
+    </section>
+  </main>
+</body>
+</html>

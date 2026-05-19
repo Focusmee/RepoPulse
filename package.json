@@ -10,6 +10,7 @@
   "scripts": {
     "start": "node src/cli.js run",
     "report": "node src/cli.js run",
+    "brief": "node scripts/render-brief.js",
     "doctor": "node src/cli.js doctor",
     "profiles": "node src/cli.js profiles",
     "test": "node --test",

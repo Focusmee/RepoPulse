@@ -71,10 +71,13 @@ export function buildOpenAIMessages(input, { retryMode = false } = {}) {
           dimensions: LEARNING_DIMENSIONS
         },
         output_schema: {
-          schema_version: "1.2",
+          schema_version: "1.3",
           summary: "一句话说明项目用途，少于 40 个中文字",
           problem_solved: "它解决的问题",
           why_it_matters_now: "为什么现在值得关注",
+          context_explanation: "项目背景与使用场景：给不熟悉该技术的人也能看懂，说明它是什么、做什么、适合什么场景，120-180 个中文字内",
+          use_case_example: "简单例子：用一个具体场景解释这个项目如何发挥作用，不要抽象空话，80-140 个中文字内",
+          learning_takeaways: ["能学习到什么：2-4 条可复刻点，例如架构、API 设计、工程组织、demo 转化方式"],
           learning_value: {
             score: "0-100",
             level: "low | medium | high",
@@ -111,6 +114,9 @@ export function buildOpenAIMessages(input, { retryMode = false } = {}) {
           "learning_value.reasons 必须 2-4 条，每条都必须有 evidence。",
           "recommended_reading_path 必须 1-3 步，并且可执行；优先写下一步动作，不要写长学习计划。",
           "recommended_reading_path 至少包含一种具体入口，例如 README 的章节、examples、src/packages 入口、或 clone 后交给 AI 分析的模块。",
+          "context_explanation 必须让没有接触过该项目或技术的人也能看懂：它是什么、做什么、适合什么使用场景。",
+          "use_case_example 必须是一个具体例子，例如某类开发者用它搭一个 demo、替换一个流程或验证一个产品假设。",
+          "learning_takeaways 必须写可学习/可复刻的点，不要只写“了解项目”。",
           "learning_cost.level 描述学习成本高低；learning_cost.investment_fit_score 描述当下投入适配度，分数越高越适合投入。",
           "学习成本不是项目风险：项目规模、环境复杂、陌生技术栈等写入 learning_cost；license、维护、API 稳定性等写入 risks。",
           "risks 至少 1 条，最多 3 条；没有明显风险也要写出需要复核的不确定性。",

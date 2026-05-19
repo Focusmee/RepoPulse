@@ -69,6 +69,9 @@ test("markdown renderer escapes untrusted repo and analysis text", () => {
   assert.ok(markdown.includes("&lt;script&gt;"));
   assert.ok(markdown.includes("&lt;img src=x&gt;"));
   assert.ok(markdown.includes("是否值得点开"));
+  assert.ok(markdown.includes("项目背景与使用场景"));
+  assert.ok(markdown.includes("简单例子"));
+  assert.ok(markdown.includes("能学习到什么"));
   assert.ok(markdown.includes("学习成本"));
   assert.ok(markdown.includes("投入适配分"));
   assert.ok(markdown.includes("最大风险"));
@@ -80,7 +83,8 @@ test("markdown renderer escapes untrusted repo and analysis text", () => {
   assert.ok(markdown.includes("分析方式：heuristic 降级（AI 失败类型：parse_error"));
   assert.ok(markdown.includes("data/debug-ai/demo-attempt-1-parse_error.json、data/debug-ai/demo-attempt-2-schema_error.json"));
   assert.ok(markdown.includes("判断：&lt;b&gt;good&lt;/b&gt;；证据：README"));
-  assert.ok(markdown.includes("low：&lt;risk&gt;"));
+  assert.ok(markdown.includes("低风险：&lt;risk&gt;"));
+  assert.equal(markdown.includes("low：&lt;risk&gt;"), false);
   assert.ok(markdown.indexOf("推荐理由与证据") < markdown.indexOf("事实来源"));
   assert.equal(markdown.includes("<script>"), false);
   assert.equal(markdown.includes("<img src=x>"), false);
