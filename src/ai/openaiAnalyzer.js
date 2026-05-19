@@ -2,6 +2,7 @@ import { coerceAnalysis, validateAnalysis } from "./schema.js";
 import { buildOpenAIMessages } from "./prompt.js";
 import { AIProviderError, classifyHttpStatus } from "./errors.js";
 import { fetchWithTimeout } from "../shared/http.js";
+import { estimateLearningCost, normalizeLearningCost } from "../scorers/learningCost.js";
 
 export async function analyzeRepoWithOpenAI({
   input,
@@ -83,6 +84,18 @@ export async function analyzeRepoWithOpenAI({
   }
 
   const coerced = coerceAnalysis(parsed);
+  coerced.learning_cost = normalizeLearningCost(
+    parsed.learning_cost,
+    estimateLearningCost({
+      repo: input.repo,
+      analysis: coerced,
+      profile: input.user_profile,
+      documents: {
+        readme_text: input.documents?.readme_excerpt || "",
+        latest_release_notes: input.documents?.release_excerpt || ""
+      }
+    })
+  );
   const validation = validateAnalysis(coerced);
   if (!validation.ok) {
     throw new AIProviderError(`OpenAI 输出不符合 schema: ${validation.errors.join("; ")}`, {

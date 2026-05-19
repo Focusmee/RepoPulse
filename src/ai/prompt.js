@@ -71,7 +71,7 @@ export function buildOpenAIMessages(input, { retryMode = false } = {}) {
           dimensions: LEARNING_DIMENSIONS
         },
         output_schema: {
-          schema_version: "1.1",
+          schema_version: "1.2",
           summary: "一句话说明项目用途，少于 40 个中文字",
           problem_solved: "它解决的问题",
           why_it_matters_now: "为什么现在值得关注",
@@ -93,16 +93,29 @@ export function buildOpenAIMessages(input, { retryMode = false } = {}) {
           trend_explanation: { score_hint: "高 | 中 | 低", signals: ["信号"] },
           audience: ["适合的人群"],
           profile_fit: { score: "0-100", why_for_this_user: "为什么适合当前用户画像" },
-          recommended_reading_path: [{ step: 1, action: "动作", goal: "目标" }],
+          learning_cost: {
+            level: "low | medium | high",
+            investment_fit_score: "0-100，越高表示越适合当前用户现在投入，不表示成本越高",
+            estimated_effort: "30 分钟了解 / 半天跑通 / 2-3 天深入",
+            prerequisites: ["需要补齐的前置知识"],
+            blockers: ["可能卡住用户的环境、依赖、源码规模或概念门槛"],
+            why_for_this_user: "结合当前画像解释为什么成本低/中/高"
+          },
+          recommended_reading_path: [{ step: 1, action: "1 到 3 个下一步动作，例如先读 README 某节或让 AI 分析某个入口模块", goal: "目标" }],
           project_idea: "可转化的应用或简历项目想法",
-          risks: [{ risk: "潜在风险", severity: "low | medium | high" }],
+          risks: [{ risk: "最多 3 条具体风险，必须说明触发依据或影响", severity: "low | medium | high" }],
           confidence: { score: "0-100", reason: "置信度原因" }
         },
         quality_rules: [
           "每个 learning_value.breakdown 项都必须有 reason 和 evidence。",
           "learning_value.reasons 必须 2-4 条，每条都必须有 evidence。",
-          "recommended_reading_path 必须 2-5 步，并且可执行。",
-          "risks 至少 1 条，没有明显风险也要写出需要复核的不确定性。",
+          "recommended_reading_path 必须 1-3 步，并且可执行；优先写下一步动作，不要写长学习计划。",
+          "recommended_reading_path 至少包含一种具体入口，例如 README 的章节、examples、src/packages 入口、或 clone 后交给 AI 分析的模块。",
+          "learning_cost.level 描述学习成本高低；learning_cost.investment_fit_score 描述当下投入适配度，分数越高越适合投入。",
+          "学习成本不是项目风险：项目规模、环境复杂、陌生技术栈等写入 learning_cost；license、维护、API 稳定性等写入 risks。",
+          "risks 至少 1 条，最多 3 条；没有明显风险也要写出需要复核的不确定性。",
+          "risks 优先覆盖 API 兼容/破坏性变更、数据安全/隐私、license、外部服务依赖、项目规模、维护节奏或 release 稳定性。",
+          "风险必须具体，不要只写“项目较新”“学习成本高”“存在不确定性”。",
           "不要编造 README、release、examples、架构或功能。"
         ],
         input

@@ -87,6 +87,7 @@ test("AI fallback metadata is counted and attached to analysis results", async (
   assert.equal(result.aiFailureTypeCounts.get("parse_error"), 1);
   assert.equal(result.analysisMeta.get("1").ai_failure_type, "parse_error");
   assert.equal(store.getAnalysis(1, "2026-05-18", "test").ai_attempts, 2);
+  assert.equal(Boolean(store.getAnalysis(1, "2026-05-18", "test").structured_json.learning_cost), true);
 });
 
 test("analysis cache version prevents reusing old non-diagnostic heuristic results", async () => {
@@ -141,7 +142,7 @@ test("analysis cache version prevents reusing old non-diagnostic heuristic resul
   assert.equal(analyzeCalls, 1);
   assert.equal(result.analyses.get("1").summary, "fresh");
   assert.notEqual(stored.input_hash, oldInputHash);
-  assert.equal(stored.analysis_cache_version, "ai-debug-recovery-v1");
+  assert.equal(stored.analysis_cache_version, "learning-cost-v1");
 });
 
 class MemoryStore {

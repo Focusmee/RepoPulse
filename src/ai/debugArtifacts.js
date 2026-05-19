@@ -80,7 +80,13 @@ export function summarizeInput(input = {}) {
       role: input.user_profile?.role || "",
       preferred_languages: input.user_profile?.preferred_languages || [],
       interested_topics: input.user_profile?.interested_topics || [],
-      learning_goals: input.user_profile?.learning_goals || []
+      learning_goals: input.user_profile?.learning_goals || [],
+      skill_level: input.user_profile?.skill_level || "",
+      known_stack: input.user_profile?.known_stack || [],
+      weak_areas: input.user_profile?.weak_areas || [],
+      time_budget: input.user_profile?.time_budget || "",
+      preferred_project_size: input.user_profile?.preferred_project_size || "",
+      goal_priority: input.user_profile?.goal_priority || []
     }
   };
 }

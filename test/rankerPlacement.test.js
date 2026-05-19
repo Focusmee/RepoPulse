@@ -69,6 +69,125 @@ test("ranker does not route every project idea to project inspiration", () => {
   assert.notEqual(ranked.items.find((item) => item.repo.full_name === "demo/ordinary-library").category, "可转化为项目灵感");
 });
 
+test("ranker routes hot but weak profile matches to observation instead of deep read", () => {
+  const profile = {
+    preferred_languages: ["TypeScript"],
+    interested_topics: ["agent"],
+    learning_goals: ["做应用"],
+    excluded_topics: []
+  };
+  const repo = makeRepo(1, "demo/hot-rust-platform", "Rust platform with fast growth");
+  repo.language = "Rust";
+  repo.topics = ["rust", "platform"];
+  const analysis = {
+    ...makeAnalysis(),
+    profile_fit: { score: 35, why_for_this_user: "Trend is interesting but profile match is weak" }
+  };
+
+  const ranked = rankAnalyzedRepos({
+    repos: [repo],
+    analyses: new Map([["1", analysis]]),
+    trends: new Map([["1", { trend_score: 95, stars_1d: 900, source_tags: ["github_trending:daily"] }]]),
+    profile,
+    documents: new Map([["1", { readme_status: "ok", readme_text: "README".repeat(100) }]]),
+    referenceDate: "2026-05-18",
+    limit: 1
+  });
+
+  assert.equal(ranked.items[0].category, "上升很快，值得观察");
+  assert.equal(ranked.items[0].recommendation_level, "值得观察");
+});
+
+test("ranker blocks strong recommendation when high risk is present", () => {
+  const profile = {
+    preferred_languages: ["TypeScript"],
+    interested_topics: ["agent"],
+    learning_goals: ["做应用"],
+    excluded_topics: []
+  };
+  const repo = makeRepo(1, "demo/risky-agent-platform");
+  const analysis = {
+    ...makeAnalysis(),
+    risks: [{ risk: "仓库已归档，后续维护和安全修复不可期待。", severity: "high" }]
+  };
+
+  const ranked = rankAnalyzedRepos({
+    repos: [repo],
+    analyses: new Map([["1", analysis]]),
+    trends: new Map([["1", { trend_score: 90, stars_1d: 700, source_tags: ["github_trending:daily"] }]]),
+    profile,
+    documents: new Map([["1", { readme_status: "ok", readme_text: "README".repeat(100) }]]),
+    referenceDate: "2026-05-18",
+    limit: 1
+  });
+
+  assert.equal(ranked.items[0].category, "谨慎关注");
+  assert.notEqual(ranked.items[0].recommendation_level, "强推荐");
+});
+
+test("ranker changes placement for different skill level and time budget profiles", () => {
+  const complexRepo = makeRepo(1, "demo/kubernetes-agent-platform", "Kubernetes orchestration platform for distributed agents");
+  complexRepo.language = "Rust";
+  complexRepo.topics = ["kubernetes", "agent", "platform"];
+  complexRepo.open_issues = 420;
+  const simpleRepo = makeRepo(2, "demo/typescript-agent-cli", "TypeScript agent CLI with quickstart examples");
+  simpleRepo.topics = ["agent", "developer-tools"];
+
+  const analyses = new Map([
+    ["1", { ...makeAnalysis(), profile_fit: null, project_idea: "Extract a Kubernetes agent architecture demo" }],
+    [
+      "2",
+      {
+        ...makeAnalysis(),
+        summary: "TypeScript agent CLI",
+        problem_solved: "Runs agent CLI demos",
+        profile_fit: null,
+        learning_value: { ...makeAnalysis().learning_value, score: 90 },
+        project_idea: "Ship a small TypeScript CLI demo"
+      }
+    ]
+  ]);
+  const trends = new Map([
+    ["1", { trend_score: 95, stars_1d: 900, source_tags: ["github_trending:daily"] }],
+    ["2", { trend_score: 45, stars_1d: 20, source_tags: ["search:topic:agent"] }]
+  ]);
+  const documents = new Map([
+    ["1", { readme_status: "ok", readme_text: "Requires Kubernetes GPU workers OAuth and distributed platform setup." }],
+    ["2", { readme_status: "ok", readme_text: "## Quickstart\n\nRun npm install and npm run demo. TypeScript CLI examples.".repeat(20) }]
+  ]);
+  const junior = {
+    preferred_languages: ["TypeScript"],
+    interested_topics: ["agent"],
+    learning_goals: ["做应用"],
+    excluded_topics: [],
+    skill_level: "junior",
+    known_stack: ["TypeScript"],
+    weak_areas: ["Kubernetes", "Rust"],
+    time_budget: "quick-scan",
+    preferred_project_size: "small",
+    goal_priority: ["ship_demo"]
+  };
+  const senior = {
+    preferred_languages: ["Rust", "TypeScript"],
+    interested_topics: ["agent", "kubernetes"],
+    learning_goals: ["学习工程架构"],
+    excluded_topics: [],
+    skill_level: "senior",
+    known_stack: ["Rust", "Kubernetes", "Docker"],
+    weak_areas: [],
+    time_budget: "deep-study",
+    preferred_project_size: "large",
+    goal_priority: ["learn_architecture"]
+  };
+
+  const juniorRanked = rankAnalyzedRepos({ repos: [complexRepo, simpleRepo], analyses, trends, profile: junior, documents, referenceDate: "2026-05-18", limit: 2 });
+  const seniorRanked = rankAnalyzedRepos({ repos: [complexRepo, simpleRepo], analyses, trends, profile: senior, documents, referenceDate: "2026-05-18", limit: 2 });
+
+  assert.equal(juniorRanked.items[0].repo.full_name, "demo/typescript-agent-cli");
+  assert.equal(seniorRanked.items[0].repo.full_name, "demo/kubernetes-agent-platform");
+  assert.equal(juniorRanked.items.find((item) => item.repo.repo_id === 1).analysis.learning_cost.level, "high");
+});
+
 function makeRepo(repo_id, full_name, description = "Agent platform for TypeScript developers") {
   return {
     repo_id,

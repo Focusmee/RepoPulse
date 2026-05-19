@@ -12,13 +12,14 @@ import { rankAnalyzedRepos } from "../rankers/personalizedRanker.js";
 import { renderMarkdownReport } from "../reports/renderMarkdown.js";
 import { checkReportQuality } from "../reports/qualityCheck.js";
 import { buildSnapshots, calculateTrendScores } from "../scorers/trendScorer.js";
+import { estimateLearningCost } from "../scorers/learningCost.js";
 import { mapLimit } from "../shared/async.js";
 import { addDays, todayString } from "../shared/date.js";
 import { ensureDir, writeText } from "../shared/fs.js";
 import { stableHash } from "../shared/text.js";
 import { JsonStore } from "../store/jsonStore.js";
 
-const ANALYSIS_CACHE_VERSION = "ai-debug-recovery-v1";
+const ANALYSIS_CACHE_VERSION = "learning-cost-v1";
 
 export async function runDailyDigest(options = {}) {
   const runtimeConfig = options.runtimeConfig || getRuntimeConfig();
@@ -219,9 +220,15 @@ export async function analyzePreselectedRepos({
         referenceDate: date,
         logger
       });
+      const analysisWithLearningCost = analysis.learning_cost
+        ? analysis
+        : {
+            ...analysis,
+            learning_cost: estimateLearningCost({ repo, analysis, profile, documents: document })
+          };
 
       providerCounts.set(provider, (providerCounts.get(provider) || 0) + 1);
-      analyses.set(String(repo.repo_id), analysis);
+      analyses.set(String(repo.repo_id), analysisWithLearningCost);
       const meta = {
         provider,
         model: provider === "openai" ? runtimeConfig.openaiModel : "heuristic",
@@ -242,12 +249,12 @@ export async function analyzePreselectedRepos({
         model: provider === "openai" ? runtimeConfig.openaiModel : "heuristic",
         analysis_cache_version: ANALYSIS_CACHE_VERSION,
         input_hash: inputHash,
-        structured_json: analysis,
+        structured_json: analysisWithLearningCost,
         ai_failure_type: meta.ai_failure_type,
         ai_error: meta.ai_error,
         ai_attempts: meta.ai_attempts,
         ai_debug_artifacts: meta.ai_debug_artifacts,
-        confidence: analysis.confidence?.score || 0,
+        confidence: analysisWithLearningCost.confidence?.score || 0,
         validation_status: "ok",
         created_at: new Date().toISOString()
       });

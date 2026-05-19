@@ -27,6 +27,14 @@ const OVERSELLING_PATTERNS = [
   /无可替代/g
 ];
 
+const VAGUE_RISK_PATTERNS = [
+  /^项目较新[。.]?$/,
+  /^学习成本高[。.]?$/,
+  /^存在不确定性[。.]?$/,
+  /^需要进一步观察[。.]?$/,
+  /^风险较高[。.]?$/
+];
+
 export function checkReportQuality({ ranked }) {
   const items = ranked?.items || [];
   const warnings = [];
@@ -48,6 +56,7 @@ export function checkReportQuality({ ranked }) {
 
   for (const item of items) {
     checkEvidence(item, warnings);
+    checkRisks(item, warnings);
     checkSuspiciousText(item, warnings);
     checkOversellingText(item, warnings);
   }
@@ -56,6 +65,20 @@ export function checkReportQuality({ ranked }) {
     warning_count: warnings.length,
     warnings
   };
+}
+
+function checkRisks(item, warnings) {
+  const risks = item.analysis?.risks || [];
+  if (item.recommendation_level === "强推荐" && risks.some((risk) => risk.severity === "high")) {
+    warnings.push(warning("high", "overstrong_recommendation", item.repo?.full_name, "强推荐项目包含 high 风险，应降级或补充明确收益说明。"));
+  }
+
+  for (const [index, risk] of risks.entries()) {
+    const text = String(risk.risk || "").trim();
+    if (isVagueRisk(text)) {
+      warnings.push(warning("medium", "vague_risk", item.repo?.full_name, `风险 ${index + 1} 过于空泛：${text || "空"}`));
+    }
+  }
 }
 
 function checkEvidence(item, warnings) {
@@ -129,6 +152,11 @@ function collectItemText(item) {
 function isVagueEvidence(evidence) {
   if (evidence.length < 8) return true;
   return VAGUE_EVIDENCE_PATTERNS.some((pattern) => pattern.test(evidence));
+}
+
+function isVagueRisk(risk) {
+  if (risk.length < 10) return true;
+  return VAGUE_RISK_PATTERNS.some((pattern) => pattern.test(risk));
 }
 
 function warning(level, type, repo, message) {

@@ -51,4 +51,46 @@ The core engine includes providers, runtime modules, examples and tests.
   assert.equal(analysis.learning_value.breakdown.length, 7);
   assert.ok(analysis.learning_value.breakdown.every((item) => item.reason && item.evidence));
   assert.ok(analysis.learning_value.score > 0);
+  assert.equal(["low", "medium", "high"].includes(analysis.learning_cost.level), true);
+  assert.ok(analysis.learning_cost.investment_fit_score >= 0);
+  assert.ok(analysis.recommended_reading_path.length <= 3);
+});
+
+test("heuristic analyzer produces specific P2 risk categories", () => {
+  const analysis = analyzeRepoHeuristically({
+    repo: {
+      repo_id: 2,
+      full_name: "demo/experimental-cloud-agent",
+      description: "Experimental agent platform with OpenAI API key and OAuth integrations",
+      language: "Python",
+      topics: ["agent", "platform", "oauth"],
+      stars: 800,
+      forks: 50,
+      license: "",
+      open_issues: 450,
+      pushed_at: "2026-05-10"
+    },
+    trend: {
+      trend_score: 80,
+      stars_1d: 100,
+      stars_7d: 700,
+      forks_7d: 60,
+      source_tags: ["github_trending:daily"]
+    },
+    documents: {
+      readme_text: "# Demo\n\nExperimental platform that requires an OpenAI API key, OAuth login and external cloud services."
+    },
+    profile: {
+      role: "AI 应用开发者",
+      preferred_languages: ["TypeScript"],
+      interested_topics: ["agent"],
+      learning_goals: ["做应用"],
+      excluded_topics: []
+    },
+    referenceDate: "2026-05-18"
+  });
+
+  const riskText = analysis.risks.map((risk) => risk.risk).join("\n");
+  assert.match(riskText, /license|API|OAuth|外部服务|平台/);
+  assert.ok(analysis.risks.every((risk) => risk.risk.length >= 10));
 });

@@ -1,6 +1,8 @@
 import { LEARNING_DIMENSIONS } from "./prompt.js";
+import { normalizeLearningCost } from "../scorers/learningCost.js";
 
 const VALID_RISK_SEVERITIES = new Set(["low", "medium", "high"]);
+const VALID_COST_LEVELS = new Set(["low", "medium", "high"]);
 
 export function validateAnalysis(value) {
   const errors = [];
@@ -12,6 +14,7 @@ export function validateAnalysis(value) {
   if (!["low", "medium", "high"].includes(value.learning_value?.level)) errors.push("learning_value.level is invalid");
   validateBreakdown(value.learning_value?.breakdown, errors);
   validateReasons(value.learning_value?.reasons, errors);
+  validateLearningCost(value.learning_cost, errors);
   validateReadingPath(value.recommended_reading_path, errors);
   validateRisks(value.risks, errors);
   if (!isScore(value.confidence?.score)) errors.push("confidence.score is required");
@@ -23,7 +26,7 @@ export function validateAnalysis(value) {
 
 export function coerceAnalysis(value = {}) {
   return {
-    schema_version: value.schema_version || "1.0",
+    schema_version: value.schema_version || "1.2",
     summary: String(value.summary || "").slice(0, 80),
     problem_solved: String(value.problem_solved || value.summary || ""),
     why_it_matters_now: String(value.why_it_matters_now || ""),
@@ -42,7 +45,8 @@ export function coerceAnalysis(value = {}) {
       score: clampInteger(value.profile_fit?.score),
       why_for_this_user: String(value.profile_fit?.why_for_this_user || "")
     },
-    recommended_reading_path: (value.recommended_reading_path || []).slice(0, 5).map((item, index) => ({
+    learning_cost: normalizeLearningCost(value.learning_cost),
+    recommended_reading_path: (value.recommended_reading_path || []).slice(0, 3).map((item, index) => ({
       step: Number(item?.step || index + 1),
       action: String(item?.action ?? (typeof item === "string" ? item : "")),
       goal: String(item?.goal ?? "")
@@ -139,11 +143,25 @@ function validateReasons(reasons, errors) {
   }
 }
 
+function validateLearningCost(cost, errors) {
+  if (!cost || typeof cost !== "object") {
+    errors.push("learning_cost is required");
+    return;
+  }
+  if (!VALID_COST_LEVELS.has(cost.level)) errors.push("learning_cost.level is invalid");
+  if (!isScore(cost.investment_fit_score)) errors.push("learning_cost.investment_fit_score is required");
+  if (!hasText(cost.estimated_effort)) errors.push("learning_cost.estimated_effort is required");
+  if (!Array.isArray(cost.prerequisites)) errors.push("learning_cost.prerequisites must be an array");
+  if (!Array.isArray(cost.blockers)) errors.push("learning_cost.blockers must be an array");
+  if (!hasText(cost.why_for_this_user)) errors.push("learning_cost.why_for_this_user is required");
+}
+
 function validateReadingPath(path, errors) {
   if (!Array.isArray(path) || path.length === 0) {
     errors.push("recommended_reading_path is required");
     return;
   }
+  if (path.length > 3) errors.push("recommended_reading_path must have at most 3 steps");
   for (const [index, step] of path.entries()) {
     if (!Number.isFinite(Number(step.step))) errors.push(`recommended_reading_path[${index}].step is required`);
     if (!hasText(step.action)) errors.push(`recommended_reading_path[${index}].action is required`);

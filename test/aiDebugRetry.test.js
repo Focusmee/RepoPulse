@@ -134,7 +134,7 @@ test("OpenAI analyzer classifies schema, rate limit, http and timeout failures",
 
 function validAnalysis() {
   return {
-    schema_version: "1.1",
+    schema_version: "1.2",
     summary: "用于测试的 AI 项目分析",
     problem_solved: "帮助测试结构化输出",
     why_it_matters_now: "验证 JSON 重试链路",

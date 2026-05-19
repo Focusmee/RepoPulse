@@ -3,6 +3,10 @@ import { readdir } from "node:fs/promises";
 import { readJson } from "../shared/fs.js";
 
 const DEFAULT_PROFILE_PATH = "config/profiles/default.json";
+const SKILL_LEVELS = new Set(["junior", "intermediate", "senior"]);
+const TIME_BUDGETS = new Set(["quick-scan", "weekend", "deep-study"]);
+const PROJECT_SIZES = new Set(["small", "medium", "large"]);
+const GOAL_PRIORITIES = new Set(["resume_project", "learn_architecture", "ship_demo", "follow_trend"]);
 
 export function normalizeProfile(rawProfile = {}, sourcePath = DEFAULT_PROFILE_PATH) {
   const profileId =
@@ -17,6 +21,16 @@ export function normalizeProfile(rawProfile = {}, sourcePath = DEFAULT_PROFILE_P
     interested_topics: toStringArray(rawProfile.interested_topics || rawProfile.interestedTopics),
     learning_goals: toStringArray(rawProfile.learning_goals || rawProfile.learningGoals),
     excluded_topics: toStringArray(rawProfile.excluded_topics || rawProfile.excludedTopics),
+    skill_level: normalizeEnum(rawProfile.skill_level || rawProfile.skillLevel, SKILL_LEVELS, "intermediate"),
+    known_stack: toStringArray(rawProfile.known_stack || rawProfile.knownStack),
+    weak_areas: toStringArray(rawProfile.weak_areas || rawProfile.weakAreas),
+    time_budget: normalizeEnum(rawProfile.time_budget || rawProfile.timeBudget, TIME_BUDGETS, "weekend"),
+    preferred_project_size: normalizeEnum(
+      rawProfile.preferred_project_size || rawProfile.preferredProjectSize,
+      PROJECT_SIZES,
+      "medium"
+    ),
+    goal_priority: normalizeGoalPriority(rawProfile.goal_priority || rawProfile.goalPriority),
     daily_limit: Number(rawProfile.daily_limit || rawProfile.dailyLimit || 10)
   };
 }
@@ -54,4 +68,16 @@ function toStringArray(value) {
   if (!value) return [];
   if (Array.isArray(value)) return value.map(String).map((item) => item.trim()).filter(Boolean);
   return [String(value).trim()].filter(Boolean);
+}
+
+function normalizeEnum(value, allowed, fallback) {
+  const normalized = String(value || "").trim().toLowerCase();
+  return allowed.has(normalized) ? normalized : fallback;
+}
+
+function normalizeGoalPriority(value) {
+  const values = toStringArray(value)
+    .map((item) => item.toLowerCase())
+    .filter((item) => GOAL_PRIORITIES.has(item));
+  return values.length ? Array.from(new Set(values)) : ["learn_architecture", "ship_demo"];
 }

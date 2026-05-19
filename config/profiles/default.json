@@ -4,6 +4,12 @@
   "preferred_languages": ["TypeScript", "Java", "Python"],
   "interested_topics": ["llm", "agent", "developer-tools", "distributed-systems"],
   "learning_goals": ["找工作", "学习工程架构", "发现可做成应用的项目"],
+  "skill_level": "intermediate",
+  "known_stack": ["TypeScript", "Java", "Python", "Docker"],
+  "weak_areas": ["Kubernetes", "Rust"],
+  "time_budget": "weekend",
+  "preferred_project_size": "medium",
+  "goal_priority": ["resume_project", "learn_architecture", "ship_demo"],
   "excluded_topics": ["blockchain"],
   "daily_limit": 10
 }

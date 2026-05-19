@@ -4,6 +4,12 @@
   "preferred_languages": ["Java", "Kotlin", "Go"],
   "interested_topics": ["spring-boot", "distributed-systems", "database", "middleware", "workflow"],
   "learning_goals": ["找工作", "学习工程架构", "读源码"],
+  "skill_level": "intermediate",
+  "known_stack": ["Java", "Spring Boot", "SQL", "Docker"],
+  "weak_areas": ["Rust", "GPU", "前端框架"],
+  "time_budget": "weekend",
+  "preferred_project_size": "large",
+  "goal_priority": ["learn_architecture", "resume_project"],
   "excluded_topics": ["blockchain", "nft"],
   "daily_limit": 10
 }

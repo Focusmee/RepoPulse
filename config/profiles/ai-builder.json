@@ -4,6 +4,12 @@
   "preferred_languages": ["TypeScript", "Python"],
   "interested_topics": ["llm", "agent", "rag", "ai-engineering", "developer-tools"],
   "learning_goals": ["做应用", "发现可做成应用的项目", "跟趋势"],
+  "skill_level": "intermediate",
+  "known_stack": ["TypeScript", "Python", "React", "Node.js", "Docker", "RAG"],
+  "weak_areas": ["Kubernetes", "Rust", "分布式系统"],
+  "time_budget": "weekend",
+  "preferred_project_size": "medium",
+  "goal_priority": ["ship_demo", "follow_trend", "resume_project"],
   "excluded_topics": ["blockchain"],
   "daily_limit": 10
 }

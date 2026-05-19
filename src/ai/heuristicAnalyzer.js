@@ -2,12 +2,17 @@ import { daysBetween } from "../shared/date.js";
 import { average, clamp, logScore, round } from "../shared/math.js";
 import { countMatches, extractHeadings, firstUsefulParagraph, includesAny, truncate } from "../shared/text.js";
 import { calculateProfileMatchScore, explainProfileFit } from "../scorers/profileMatch.js";
+import { estimateLearningCost } from "../scorers/learningCost.js";
 import { LEARNING_DIMENSIONS } from "./prompt.js";
 
 const DOC_TERMS = ["installation", "usage", "quickstart", "getting started", "example", "examples", "docs", "api"];
 const ARCH_TERMS = ["architecture", "design", "core", "engine", "runtime", "module", "plugin", "provider"];
 const PRACTICAL_TERMS = ["cli", "sdk", "api", "dashboard", "server", "template", "starter", "workflow", "automation", "agent"];
 const TREND_TERMS = ["llm", "agent", "rag", "ai", "workflow", "kubernetes", "database", "observability", "compiler"];
+const API_STABILITY_TERMS = ["alpha", "beta", "experimental", "preview", "unstable", "breaking", "migration", "deprecated", "v0."];
+const PRIVACY_TERMS = ["token", "api key", "secret", "credential", "oauth", "privacy", "user data", "personal data", "upload"];
+const EXTERNAL_SERVICE_TERMS = ["openai", "anthropic", "deepseek", "stripe", "aws", "azure", "google cloud", "supabase", "firebase", "slack", "github app"];
+const LARGE_PROJECT_TERMS = ["monorepo", "workspace", "kubernetes", "distributed", "microservice", "orchestration", "platform", "packages"];
 
 export function analyzeRepoHeuristically({ repo, trend, documents, profile, referenceDate }) {
   const readme = documents?.readme_text || "";
@@ -69,8 +74,8 @@ export function analyzeRepoHeuristically({ repo, trend, documents, profile, refe
     headings
   });
 
-  return {
-    schema_version: "1.0",
+  const analysis = {
+    schema_version: "1.2",
     summary,
     problem_solved: firstUsefulParagraph(readme) || repo.description || summary,
     why_it_matters_now: buildWhyItMatters(repo, trend),
@@ -91,7 +96,7 @@ export function analyzeRepoHeuristically({ repo, trend, documents, profile, refe
     },
     recommended_reading_path: buildReadingPath(readme, headings),
     project_idea: buildProjectIdea(repo, profile),
-    risks: buildRisks(repo, readme, confidence, referenceDate),
+    risks: buildRisks(repo, readme, documents, confidence, referenceDate),
     confidence: {
       score: confidence,
       reason: confidence >= 75 ? "README 和元数据较充分" : "上下文有限，建议人工复核关键判断"
@@ -106,6 +111,8 @@ export function analyzeRepoHeuristically({ repo, trend, documents, profile, refe
       ai_overall_judgement: round(aiOverallJudgement, 1)
     }
   };
+  analysis.learning_cost = estimateLearningCost({ repo, analysis, profile, documents });
+  return analysis;
 }
 
 function buildBreakdown(input) {
@@ -230,20 +237,38 @@ function buildAudience(repo, profile) {
 }
 
 function buildReadingPath(readme, headings) {
+  const quickHeading = headings.find((heading) => /quick|getting started|install|usage/i.test(heading));
+  const architectureHeading = headings.find((heading) => /architecture|design|core|runtime|module/i.test(heading));
+  const exampleHeading = headings.find((heading) => /example|demo|sample/i.test(heading));
+
   const steps = [
-    { step: 1, action: "先读 README 的项目定位、安装和快速开始部分", goal: "确认项目解决的问题和运行方式" }
+    {
+      step: 1,
+      action: quickHeading ? `先读 README 的「${quickHeading}」章节` : "先读 README 的安装、快速开始或 Usage 部分",
+      goal: "在 30 分钟内判断项目是否能跑通和解决什么问题"
+    }
   ];
-  if (headings.some((heading) => /example|usage|quick/i.test(heading))) {
-    steps.push({ step: 2, action: "阅读 examples / usage 相关章节", goal: "找到最短可运行路径" });
+
+  if (exampleHeading) {
+    steps.push({
+      step: 2,
+      action: `再看「${exampleHeading}」并挑一个最小样例运行`,
+      goal: "确认能否转化成 demo 或学习素材"
+    });
   } else {
-    steps.push({ step: 2, action: "搜索 README 中的 usage、example、demo 关键词", goal: "确认是否有可复现样例" });
+    steps.push({
+      step: 2,
+      action: "clone 后让 AI 先扫 src、examples、docs 或 packages 入口",
+      goal: "定位核心模块和最短源码阅读路径"
+    });
   }
-  if (includesAny(readme, ARCH_TERMS)) {
-    steps.push({ step: 3, action: "阅读 architecture / core / design 相关章节", goal: "理解模块边界和核心流程" });
-  } else {
-    steps.push({ step: 3, action: "进入仓库目录查看 src、examples、docs 或 packages", goal: "从目录结构判断源码阅读入口" });
-  }
-  steps.push({ step: 4, action: "查看 issues、releases 和最近提交", goal: "判断维护状态和 API 稳定性" });
+
+  steps.push({
+    step: 3,
+    action: architectureHeading ? `最后复核「${architectureHeading}」和 release / issues` : "最后复核 release、issues、license 和最近提交",
+    goal: "判断 API 稳定性、维护节奏和投入风险"
+  });
+
   return steps;
 }
 
@@ -257,14 +282,47 @@ function buildProjectIdea(repo, profile) {
   return `把项目的核心思路整理成学习卡片，和同类项目做一次对比。`;
 }
 
-function buildRisks(repo, readme, confidence, referenceDate) {
+function buildRisks(repo, readme, documents, confidence, referenceDate) {
   const risks = [];
-  if (!readme || readme.length < 500) risks.push({ risk: "README 信息偏少，AI 判断依据有限。", severity: "medium" });
-  if (!repo.license) risks.push({ risk: "license 未明确，二次开发或商用前需要确认。", severity: "medium" });
-  if (daysBetween(repo.pushed_at, referenceDate) > 180) risks.push({ risk: "近期维护活跃度偏低。", severity: "medium" });
-  if (repo.archived) risks.push({ risk: "仓库已归档，不适合作为活跃技术方向投入。", severity: "high" });
-  if (confidence < 60) risks.push({ risk: "分析置信度偏低，需要人工打开仓库复核。", severity: "medium" });
-  return risks.length ? risks.slice(0, 4) : [{ risk: "暂未发现明显风险，但仍建议检查 issue 和 release 节奏。", severity: "low" }];
+  const combinedText = [repo.description, ...(repo.topics || []), readme].filter(Boolean).join("\n");
+  const releaseNotes = documents?.latest_release_notes || "";
+
+  if (repo.archived) risks.push({ risk: "仓库已归档，后续维护和安全修复大概率不可期待。", severity: "high" });
+  if (!readme || readme.length < 500) risks.push({ risk: "README 少于 500 字，功能边界、运行方式和限制条件证据不足。", severity: "medium" });
+  if (!repo.license) risks.push({ risk: "license 未声明，二次开发、商用或简历项目引用前需要先确认授权。", severity: "medium" });
+  if (includesAny(combinedText, API_STABILITY_TERMS)) {
+    risks.push({ risk: "文档或描述出现 alpha/beta/experimental/breaking 等信号，API 兼容性和破坏性变更需要重点复核。", severity: "medium" });
+  }
+  if (includesAny(combinedText, PRIVACY_TERMS)) {
+    risks.push({ risk: "项目涉及 token、API key、OAuth 或用户数据，运行 demo 前需要确认密钥存储和隐私处理方式。", severity: "medium" });
+  }
+  if (includesAny(combinedText, EXTERNAL_SERVICE_TERMS)) {
+    risks.push({ risk: "项目依赖外部服务或第三方 API，复现时可能受账号授权、额度、平台策略或网络环境影响。", severity: "medium" });
+  }
+  if (includesAny(combinedText, LARGE_PROJECT_TERMS) || Number(repo.open_issues || 0) > 300) {
+    risks.push({ risk: "项目呈现平台、编排、monorepo 或大量 issue 信号，直接读全量源码的学习成本可能偏高。", severity: "medium" });
+  }
+  if (daysBetween(repo.pushed_at, referenceDate) > 180) {
+    risks.push({ risk: `最近更新距报告日超过 180 天（pushed_at=${repo.pushed_at || "未知"}），维护节奏偏弱。`, severity: "medium" });
+  }
+  if (!releaseNotes) {
+    risks.push({ risk: "未获取到 release 摘要，版本节奏和稳定性需要打开仓库进一步确认。", severity: "low" });
+  }
+  if (confidence < 60) risks.push({ risk: "分析置信度低于 60，推荐理由需要人工复核 README、issues 和 release。", severity: "medium" });
+
+  return risks.length ? dedupeRisks(risks).slice(0, 4) : [{ risk: "暂未发现明显风险，但仍建议检查 issue、release 和 license。", severity: "low" }];
+}
+
+function dedupeRisks(risks) {
+  const seen = new Set();
+  const result = [];
+  for (const risk of risks) {
+    const key = risk.risk.slice(0, 28);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    result.push(risk);
+  }
+  return result;
 }
 
 function confidenceScore(repo, readme) {

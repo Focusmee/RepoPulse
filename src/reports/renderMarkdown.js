@@ -1,5 +1,6 @@
 import { round } from "../shared/math.js";
 import { escapeMarkdownText, safePlainUrl } from "../shared/markdown.js";
+import { estimateLearningCost } from "../scorers/learningCost.js";
 
 export function renderMarkdownReport({ date, profile, ranked, stats }) {
   const sections = groupByCategory(ranked.items);
@@ -69,23 +70,38 @@ function renderItem(item, index, profile) {
     `### ${index}. ${text(repo.full_name)}`,
     "",
     `- 一句话定位：${text(analysis.summary)}`,
+    `- 是否值得点开：${text(buildClickVerdict(item))}`,
     `- 推荐等级：${text(item.recommendation_level || recommendationLevel(scores.personalized_score))}`,
     renderAnalysisMode(item.analysis_meta),
     `- 项目类型：${text(item.repo_class?.label || "未分类")}；${text(item.repo_class?.reason || "")}`,
-    `- 综合分：${scores.personalized_score}；学习价值：${scores.learning_score}；热度：${scores.trend_score}；画像匹配：${scores.profile_match_score}`,
+    `- 综合分：${scores.personalized_score}；学习价值：${scores.learning_score}；热度：${scores.trend_score}；画像匹配：${scores.profile_match_score}；投入适配：${scores.investment_fit_score ?? "未计算"}`,
     `- 置信度：${round(Number(analysis.confidence?.score || 0), 1)}；${text(analysis.confidence?.reason || "未提供置信度说明")}`,
-    ...renderFactSources(item),
     ...renderAttentionSignals(repo, trend),
-    ...renderLearningSignals(analysis),
-    ...renderProfileFit(repo, analysis, profile),
-    ...renderReadingPath(analysis.recommended_reading_path),
-    analysis.project_idea ? `- 可转化项目想法：${text(analysis.project_idea)}` : null,
+    ...renderRecommendationReasons(analysis),
+    ...renderLearningCostEstimate(item, profile),
     ...renderRisks(analysis.risks, item.repo_class),
+    ...renderRecommendedActions(analysis.recommended_reading_path),
+    ...renderProfileFit(repo, analysis, profile),
+    analysis.project_idea ? `- 可转化项目想法：${text(analysis.project_idea)}` : null,
+    ...renderFactSources(item),
+    ...renderLearningSummary(analysis),
     `- 链接：${safePlainUrl(repo.html_url) || text(repo.html_url)}`,
     ""
   ]
     .filter(Boolean)
     .join("\n");
+}
+
+function buildClickVerdict(item) {
+  const analysis = item.analysis || {};
+  const topReason = analysis.learning_value?.reasons?.[0]?.reason || analysis.why_it_matters_now || analysis.summary || "建议结合 README 再判断";
+  const highestRisk = pickHighestRisk(analysis.risks);
+
+  if (item.recommendation_level === "强推荐") return `建议点开深读：${topReason}`;
+  if (item.category === "上升很快，值得观察") return `值得点开观察趋势：${analysis.why_it_matters_now || renderTrend(item.trend)}`;
+  if (item.category === "可转化为项目灵感") return `适合点开找灵感：${analysis.project_idea || topReason}`;
+  if (highestRisk?.severity === "high") return `先谨慎观察：${highestRisk.risk}`;
+  return `可以先扫一眼 README：${highestRisk?.risk || topReason}`;
 }
 
 function renderAnalysisMode(meta) {
@@ -105,9 +121,10 @@ function renderDebugArtifacts(paths = []) {
   return `；debug：${values.map(text).join("、")}`;
 }
 
-function renderLearningBreakdown(breakdown = []) {
+function renderLearningBreakdown(breakdown = [], limit = 3) {
   if (!breakdown.length) return "暂无明细";
   return breakdown
+    .slice(0, limit)
     .map((item) => `${text(item.label)} ${round(Number(item.score || 0), 1)} x${Math.round(Number(item.weight || 0) * 100)}%`)
     .join("；");
 }
@@ -143,20 +160,40 @@ function renderAttentionSignals(repo, trend) {
   ];
 }
 
-function renderLearningSignals(analysis) {
+function renderRecommendationReasons(analysis) {
+  const reasons = analysis.learning_value?.reasons || [];
+  return [
+    "- 推荐理由与证据：",
+    ...(reasons.length
+      ? reasons.map((reason, index) => `  ${index + 1}. 判断：${text(reason.reason)}；证据：${text(reason.evidence)}`)
+      : ["  1. 判断：暂无明确推荐理由；证据：需要人工打开 README 复核"])
+  ];
+}
+
+function renderLearningSummary(analysis) {
   const breakdown = analysis.learning_value?.breakdown || [];
   const importantDimensions = pickLearningDimensions(breakdown);
   return [
-    `- 学习价值明细：${renderLearningBreakdown(breakdown)}`,
-    "- 为什么值得学习：",
+    `- 学习价值摘要：${round(Number(analysis.learning_value?.score || 0), 1)} / ${text(analysis.learning_value?.level || "unknown")}；${renderLearningBreakdown(importantDimensions)}`,
+    "- 学习价值明细摘要：",
     ...importantDimensions.map(
       (item) => `  - ${text(item.label)} ${round(Number(item.score || 0), 1)}：${text(item.reason)}；证据：${text(item.evidence)}`
-    ),
-    "- 推荐理由与证据：",
-    ...(analysis.learning_value?.reasons || []).map(
-      (reason, index) => `  ${index + 1}. 判断：${text(reason.reason)}；证据：${text(reason.evidence)}`
     )
   ];
+}
+
+function renderLearningCostEstimate(item, profile = {}) {
+  const cost =
+    item.analysis?.learning_cost ||
+    estimateLearningCost({ repo: item.repo, analysis: item.analysis, profile, repoClass: item.repo_class });
+  const prerequisites = (cost.prerequisites || []).filter(Boolean);
+  const blockers = (cost.blockers || []).filter(Boolean);
+  return [
+    "- 学习成本：",
+    `  - ${text(cost.level)}；投入适配分 ${round(Number(cost.investment_fit_score || 0), 1)}：${text(cost.estimated_effort)}；${text(cost.why_for_this_user)}`,
+    prerequisites.length ? `  - 前置知识：${joinText(prerequisites.slice(0, 4))}` : null,
+    blockers.length ? `  - 可能卡点：${joinText(blockers.slice(0, 3))}` : null
+  ].filter(Boolean);
 }
 
 function renderProfileFit(repo, analysis, profile = {}) {
@@ -172,19 +209,27 @@ function renderProfileFit(repo, analysis, profile = {}) {
   ];
 }
 
-function renderReadingPath(path = []) {
+function renderRecommendedActions(path = []) {
+  const actions = path.slice(0, 3);
   return [
-    "- 推荐阅读路径：",
-    ...path.map((step) => `  ${step.step}. ${text(step.action)}，目标：${text(step.goal)}`)
+    "- 推荐动作：",
+    ...(actions.length
+      ? actions.map((step, index) => `  ${index + 1}. ${text(step.action)}，目标：${text(step.goal)}`)
+      : ["  1. 先打开 README 和 examples，目标：确认项目是否值得继续投入"])
   ];
 }
 
 function renderRisks(risks = [], repoClass) {
-  const classRisk = repoClass?.deep_read_eligible === false ? [`medium：${repoClass.label} 不默认等同于生产级工程，建议优先作为灵感或复刻素材。`] : [];
+  const classRisk =
+    repoClass?.deep_read_eligible === false
+      ? [{ severity: "medium", risk: `${repoClass.label} 不默认等同于生产级工程，建议优先作为灵感或复刻素材。` }]
+      : [];
+  const visibleRisks = [...classRisk, ...risks].slice(0, 3);
   return [
-    "- 风险：",
-    ...classRisk.map((risk) => `  - ${text(risk)}`),
-    ...risks.map((risk) => `  - ${text(risk.severity)}：${text(risk.risk)}`)
+    "- 最大风险：",
+    ...(visibleRisks.length
+      ? visibleRisks.map((risk) => `  - ${text(risk.severity)}：${text(risk.risk)}`)
+      : ["  - low：暂未发现明显风险，仍建议复核 issue、release 和 license。"])
   ];
 }
 
@@ -195,6 +240,11 @@ function renderTrend(trend) {
   if (trend.forks_7d !== null && trend.forks_7d !== undefined) parts.push(`7 日 fork ${trend.forks_7d}`);
   if (trend.source_tags?.length) parts.push(`来源 ${joinText(trend.source_tags.slice(0, 3))}`);
   return parts.length ? parts.join("；") : "暂无历史增量，使用来源和活跃度信号估算";
+}
+
+function pickHighestRisk(risks = []) {
+  const severityRank = { high: 3, medium: 2, low: 1 };
+  return [...risks].sort((a, b) => (severityRank[b.severity] || 0) - (severityRank[a.severity] || 0))[0] || null;
 }
 
 function renderQualityWarnings(warnings = []) {
