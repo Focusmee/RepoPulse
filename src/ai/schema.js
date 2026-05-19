@@ -15,6 +15,7 @@ export function validateAnalysis(value) {
   validateBreakdown(value.learning_value?.breakdown, errors);
   validateReasons(value.learning_value?.reasons, errors);
   validateLearningCost(value.learning_cost, errors);
+  validateContextFields(value, errors);
   validateReadingPath(value.recommended_reading_path, errors);
   validateRisks(value.risks, errors);
   if (!isScore(value.confidence?.score)) errors.push("confidence.score is required");
@@ -25,11 +26,21 @@ export function validateAnalysis(value) {
 }
 
 export function coerceAnalysis(value = {}) {
+  const summary = String(value.summary || "").slice(0, 80);
+  const problemSolved = String(value.problem_solved || summary || "");
+  const projectIdea = String(value.project_idea || "");
+
   return {
-    schema_version: value.schema_version || "1.2",
-    summary: String(value.summary || "").slice(0, 80),
-    problem_solved: String(value.problem_solved || value.summary || ""),
+    schema_version: value.schema_version || "1.3",
+    summary,
+    problem_solved: problemSolved,
     why_it_matters_now: String(value.why_it_matters_now || ""),
+    context_explanation: String(value.context_explanation || problemSolved || summary || "").slice(0, 220),
+    use_case_example: String(
+      value.use_case_example ||
+        (projectIdea ? `例如，先把它改造成“${projectIdea}”，用一个最小 demo 验证核心流程。` : "")
+    ).slice(0, 180),
+    learning_takeaways: normalizeStringList(value.learning_takeaways).slice(0, 4),
     learning_value: {
       score: clampInteger(value.learning_value?.score),
       level: value.learning_value?.level || scoreLevel(value.learning_value?.score || 0),
@@ -51,7 +62,7 @@ export function coerceAnalysis(value = {}) {
       action: String(item?.action ?? (typeof item === "string" ? item : "")),
       goal: String(item?.goal ?? "")
     })),
-    project_idea: String(value.project_idea || ""),
+    project_idea: projectIdea,
     risks: (value.risks || []).slice(0, 4).map((item) => ({
       risk: String(item?.risk ?? (typeof item === "string" ? item : "")),
       severity: normalizeSeverity(item?.severity)
@@ -156,6 +167,24 @@ function validateLearningCost(cost, errors) {
   if (!hasText(cost.why_for_this_user)) errors.push("learning_cost.why_for_this_user is required");
 }
 
+function validateContextFields(value, errors) {
+  if (value.context_explanation !== undefined && !hasText(value.context_explanation)) {
+    errors.push("context_explanation must not be empty when provided");
+  }
+  if (value.use_case_example !== undefined && !hasText(value.use_case_example)) {
+    errors.push("use_case_example must not be empty when provided");
+  }
+  if (value.learning_takeaways !== undefined) {
+    if (!Array.isArray(value.learning_takeaways)) {
+      errors.push("learning_takeaways must be an array");
+      return;
+    }
+    for (const [index, takeaway] of value.learning_takeaways.entries()) {
+      if (!hasText(takeaway)) errors.push(`learning_takeaways[${index}] must not be empty`);
+    }
+  }
+}
+
 function validateReadingPath(path, errors) {
   if (!Array.isArray(path) || path.length === 0) {
     errors.push("recommended_reading_path is required");
@@ -182,6 +211,10 @@ function validateRisks(risks, errors) {
 
 function normalizeSeverity(value) {
   return VALID_RISK_SEVERITIES.has(value) ? value : "medium";
+}
+
+function normalizeStringList(value = []) {
+  return (Array.isArray(value) ? value : [value]).map((item) => String(item || "").trim()).filter(Boolean);
 }
 
 function hasText(value) {

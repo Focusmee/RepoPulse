@@ -74,11 +74,18 @@ export function analyzeRepoHeuristically({ repo, trend, documents, profile, refe
     headings
   });
 
+  const problemSolved = firstUsefulParagraph(readme) || repo.description || summary;
+  const whyItMattersNow = buildWhyItMatters(repo, trend);
+  const projectIdea = buildProjectIdea(repo, profile);
+
   const analysis = {
-    schema_version: "1.2",
+    schema_version: "1.3",
     summary,
-    problem_solved: firstUsefulParagraph(readme) || repo.description || summary,
-    why_it_matters_now: buildWhyItMatters(repo, trend),
+    problem_solved: problemSolved,
+    why_it_matters_now: whyItMattersNow,
+    context_explanation: buildContextExplanation({ repo, profile, problemSolved, whyItMattersNow }),
+    use_case_example: buildUseCaseExample({ repo, summary, projectIdea }),
+    learning_takeaways: buildLearningTakeaways({ repo, profile, breakdown, projectIdea }),
     learning_value: {
       score: learningScore,
       level: learningScore >= 75 ? "high" : learningScore >= 50 ? "medium" : "low",
@@ -95,7 +102,7 @@ export function analyzeRepoHeuristically({ repo, trend, documents, profile, refe
       why_for_this_user: explainProfileFit(repo, profile, profileGoalFit)
     },
     recommended_reading_path: buildReadingPath(readme, headings),
-    project_idea: buildProjectIdea(repo, profile),
+    project_idea: projectIdea,
     risks: buildRisks(repo, readme, documents, confidence, referenceDate),
     confidence: {
       score: confidence,
@@ -182,6 +189,31 @@ function buildWhyItMatters(repo, trend) {
   }
   if (repo.stars > 5000) return "已有较高社区关注度，可作为成熟项目样本阅读。";
   return "项目进入候选池，适合结合 README 和个人目标进一步判断。";
+}
+
+function buildContextExplanation({ repo, profile, problemSolved, whyItMattersNow }) {
+  const audience = profile.role ? `对${profile.role}来说，` : "";
+  const language = repo.language ? `它可以作为 ${repo.language} 技术栈的参考样本，` : "";
+  return truncate(`${audience}${problemSolved}。${language}${whyItMattersNow}`, 180);
+}
+
+function buildUseCaseExample({ repo, summary, projectIdea }) {
+  if (projectIdea) {
+    return truncate(`例如，先把它改造成“${projectIdea}”，用一个最小 demo 验证核心流程，再决定是否深入读源码。`, 140);
+  }
+  return truncate(`例如，把 ${repo.full_name} 当成“${summary}”的参考实现，先跑通 README 的最小流程，再替换成自己的数据或业务入口。`, 140);
+}
+
+function buildLearningTakeaways({ repo, profile, breakdown, projectIdea }) {
+  const takeaways = [];
+  const strongest = [...breakdown].sort((a, b) => Number(b.score || 0) - Number(a.score || 0)).slice(0, 2);
+  for (const dimension of strongest) {
+    takeaways.push(`学习它在“${dimension.label}”上的做法：${dimension.reason}`);
+  }
+  if (repo.language) takeaways.push(`学习 ${repo.language} 项目的工程组织、依赖使用和接口表达。`);
+  if (projectIdea) takeaways.push(`学习如何把开源项目转化成自己的 demo 或产品假设：${projectIdea}`);
+  if (!takeaways.length && profile.learning_goals?.length) takeaways.push(`围绕“${profile.learning_goals[0]}”判断项目是否值得复刻。`);
+  return takeaways.slice(0, 4);
 }
 
 function buildTrendSignals(trend) {

@@ -1,15 +1,15 @@
 {
   "profile_id": "ai-builder",
-  "role": "AI 应用开发者",
+  "role": "AI 应用开发者 / 独立开发者",
   "preferred_languages": ["TypeScript", "Python"],
-  "interested_topics": ["llm", "agent", "rag", "ai-engineering", "developer-tools"],
-  "learning_goals": ["做应用", "发现可做成应用的项目", "跟趋势"],
+  "interested_topics": ["agent", "rag", "mcp", "ai-agents", "developer-tools", "workflow", "automation", "llm"],
+  "learning_goals": ["发现可复刻的 AI 应用", "快速做 demo", "发现可产品化机会", "跟趋势"],
   "skill_level": "intermediate",
-  "known_stack": ["TypeScript", "Python", "React", "Node.js", "Docker", "RAG"],
-  "weak_areas": ["Kubernetes", "Rust", "分布式系统"],
-  "time_budget": "weekend",
-  "preferred_project_size": "medium",
+  "known_stack": ["TypeScript", "Python", "React", "Node.js", "Next.js", "Docker", "RAG", "OpenAI API"],
+  "weak_areas": ["Kubernetes", "Rust", "底层模型训练", "大规模分布式系统"],
+  "time_budget": "quick-scan",
+  "preferred_project_size": "small",
   "goal_priority": ["ship_demo", "follow_trend", "resume_project"],
-  "excluded_topics": ["blockchain"],
-  "daily_limit": 10
+  "excluded_topics": ["blockchain", "nft", "web3"],
+  "daily_limit": 8
 }

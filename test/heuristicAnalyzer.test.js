@@ -54,6 +54,9 @@ The core engine includes providers, runtime modules, examples and tests.
   assert.equal(["low", "medium", "high"].includes(analysis.learning_cost.level), true);
   assert.ok(analysis.learning_cost.investment_fit_score >= 0);
   assert.ok(analysis.recommended_reading_path.length <= 3);
+  assert.ok(analysis.context_explanation.includes("AI 应用开发者"));
+  assert.ok(analysis.use_case_example.length > 0);
+  assert.ok(analysis.learning_takeaways.length >= 2);
 });
 
 test("heuristic analyzer produces specific P2 risk categories", () => {

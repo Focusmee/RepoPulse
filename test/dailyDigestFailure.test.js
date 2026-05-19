@@ -142,7 +142,7 @@ test("analysis cache version prevents reusing old non-diagnostic heuristic resul
   assert.equal(analyzeCalls, 1);
   assert.equal(result.analyses.get("1").summary, "fresh");
   assert.notEqual(stored.input_hash, oldInputHash);
-  assert.equal(stored.analysis_cache_version, "learning-cost-v1");
+  assert.equal(stored.analysis_cache_version, "context-explanation-v1");
 });
 
 class MemoryStore {

@@ -1,0 +1,15 @@
+{
+  "profile_id": "ai-career-builder",
+  "role": "想做 AI 项目的求职开发者",
+  "preferred_languages": ["TypeScript", "Python", "Java"],
+  "interested_topics": ["agent", "rag", "ai-engineering", "developer-tools", "full-stack", "llm"],
+  "learning_goals": ["找工作", "做简历项目", "学习工程架构", "快速做 demo"],
+  "skill_level": "junior",
+  "known_stack": ["JavaScript", "Python", "React", "Node.js"],
+  "weak_areas": ["Kubernetes", "Rust", "分布式系统", "底层模型训练"],
+  "time_budget": "weekend",
+  "preferred_project_size": "small",
+  "goal_priority": ["resume_project", "ship_demo", "learn_architecture"],
+  "excluded_topics": ["blockchain", "nft"],
+  "daily_limit": 6
+}

@@ -10,6 +10,7 @@ import { analyzeRepo } from "../ai/analyzer.js";
 import { preselectRepos } from "../rankers/preselector.js";
 import { rankAnalyzedRepos } from "../rankers/personalizedRanker.js";
 import { renderMarkdownReport } from "../reports/renderMarkdown.js";
+import { buildFullReportModel } from "../reports/models/buildFullReportModel.js";
 import { checkReportQuality } from "../reports/qualityCheck.js";
 import { buildSnapshots, calculateTrendScores } from "../scorers/trendScorer.js";
 import { estimateLearningCost } from "../scorers/learningCost.js";
@@ -19,7 +20,7 @@ import { ensureDir, writeText } from "../shared/fs.js";
 import { stableHash } from "../shared/text.js";
 import { JsonStore } from "../store/jsonStore.js";
 
-const ANALYSIS_CACHE_VERSION = "learning-cost-v1";
+const ANALYSIS_CACHE_VERSION = "context-explanation-v1";
 
 export async function runDailyDigest(options = {}) {
   const runtimeConfig = options.runtimeConfig || getRuntimeConfig();
@@ -131,7 +132,8 @@ export async function runDailyDigest(options = {}) {
     logger.warn?.(`RepoPulse quality ${warning.level} ${warning.repo || "report"}: ${warning.message}`);
   }
 
-  const markdown = renderMarkdownReport({ date, profile, ranked, stats });
+  const reportModel = buildFullReportModel({ date, profile, ranked, stats });
+  const markdown = renderMarkdownReport(reportModel);
   const reportPath = options.outputPath || join("reports", date.slice(0, 4), `${date}-${profile.profile_id}.md`);
 
   if (!options.dryRun) {
@@ -155,6 +157,7 @@ export async function runDailyDigest(options = {}) {
     profile,
     reportPath,
     markdown,
+    reportModel,
     stats,
     ranked
   };

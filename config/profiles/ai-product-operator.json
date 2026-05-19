@@ -1,0 +1,15 @@
+{
+  "profile_id": "ai-product-operator",
+  "role": "懂一点技术的产品 / 运营 / 增长人员",
+  "preferred_languages": ["Python", "JavaScript"],
+  "interested_topics": ["automation", "workflow", "agent", "no-code", "low-code", "marketing-tools", "content-generation"],
+  "learning_goals": ["发现可落地的 AI 工具", "提升工作效率", "发现产品机会"],
+  "skill_level": "junior",
+  "known_stack": ["ChatGPT", "Zapier", "Notion", "Python"],
+  "weak_areas": ["复杂后端", "Kubernetes", "Rust", "底层模型训练"],
+  "time_budget": "quick-scan",
+  "preferred_project_size": "small",
+  "goal_priority": ["ship_demo", "follow_trend"],
+  "excluded_topics": ["blockchain", "infra", "compiler"],
+  "daily_limit": 5
+}

@@ -1,0 +1,15 @@
+{
+  "profile_id": "industry-ai-explorer",
+  "role": "想用 AI 改造业务的行业从业者",
+  "preferred_languages": ["Python", "JavaScript"],
+  "interested_topics": ["ai-apps", "automation", "workflow", "rag", "document-ai", "customer-service", "sales-tools"],
+  "learning_goals": ["发现行业 AI 应用", "找到可外包或可合作的项目方向", "理解 AI 产品机会"],
+  "skill_level": "junior",
+  "known_stack": ["ChatGPT", "Excel", "Notion"],
+  "weak_areas": ["源码阅读", "复杂部署", "Kubernetes", "Rust"],
+  "time_budget": "quick-scan",
+  "preferred_project_size": "small",
+  "goal_priority": ["follow_trend", "ship_demo"],
+  "excluded_topics": ["blockchain", "底层模型训练"],
+  "daily_limit": 5
+}
