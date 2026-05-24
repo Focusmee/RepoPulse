@@ -1,10 +1,16 @@
 # RepoPulse
 
-RepoPulse 是一个“学习价值评分 + GitHub 项目发现 + 个性化日报”的标准化工具。它每天从 GitHub 候选项目中筛出更值得学习、借鉴或转化为应用机会的项目，并生成可阅读的 Markdown 日报。
+RepoPulse 是一个面向 AI 开发者的个性化开源项目雷达与学习决策日报工具。它每天从 GitHub 候选项目中筛出更值得学习、借鉴、复刻或转化为应用机会的项目，并生成可阅读的 Markdown / HTML 日报。
 
 它不是单纯的热榜，而是回答：
 
 > 今天哪些开源项目值得我投入学习时间，为什么，应该怎么学？
+
+## 产品化路线
+
+当前产品化优先采用“网站入口 + SBTI 测试 + 个性化日报 / 雷达订阅”，不先做完整 SaaS。网站负责介绍产品、展示样例、承接 SBTI 测试和订阅转化；GitHub 采集、分析、排序和日报生成仍由 RepoPulse 主流程完成。
+
+完整路线、变现层级和 SaaS 化触发条件见 `docs/11-产品化与变现路线.md`。
 
 ## 功能
 
@@ -111,6 +117,19 @@ npm run report -- --no-ai --max-candidates 40 --max-analyze 12
 | `default` | 通用开发者画像 | 本地默认运行和回归验证 |
 | `java-backend` | Java 后端画像 | Java / 分布式 / 后端求职与架构学习 |
 
+### SBTI 画像生成
+
+SBTI AI 开发者画像生成模块可以把测试答案转换成兼容 RepoPulse 的 profile JSON：
+
+```bash
+npm run sbti -- --sample
+npm run sbti -- --interactive --output config/profiles/sbti-generated.json
+npm run sbti -- --input examples/sbti-answer.sample.json --output config/profiles/sbti-generated.json
+npm run report -- --profile config/profiles/sbti-generated.json --limit 8
+```
+
+`config/profiles/sbti-generated.json` 是脚本生成的示例 profile，可重复覆盖；模块说明见 `src/persona/README.md`。
+
 ## Watchlist
 
 `config/watchlist.json` 用于补充你长期关注的 topic、keyword 或指定仓库。
@@ -142,6 +161,7 @@ src/
   config/     画像、watchlist、环境配置
   documents/  README / Release 抓取
   jobs/       dailyDigest 主流水线
+  persona/    SBTI AI 开发者画像生成
   rankers/    个性化排序
   reports/    Markdown 渲染
   scorers/    热度分、画像匹配

@@ -1,0 +1,157 @@
+{
+  "profile_id": "sbti-rbpc-enterprise-workflow-one-two-weeks",
+  "generated_by": "scripts/generate-sbti-showcase.js",
+  "generated_note": "由 SBTI 脚本生成；如需修改画像，请优先调整 answers 或 src/persona/buildProfileFromSbti.js。",
+  "persona_type": "SBTI",
+  "persona_code": "RBPC",
+  "persona_raw_code": "RBPC",
+  "persona_name": "稳健落地派",
+  "role": "面向团队落地的 AI 工程实践者",
+  "preferred_languages": [],
+  "interested_topics": [
+    "workflow",
+    "enterprise",
+    "automation",
+    "agent",
+    "integration",
+    "cli"
+  ],
+  "learning_goals": [
+    "提升工作效率",
+    "发现可落地自动化工具"
+  ],
+  "excluded_topics": [],
+  "skill_level": "senior",
+  "known_stack": [
+    "LLM",
+    "OpenAI API",
+    "GitHub",
+    "Agent",
+    "Workflow Automation"
+  ],
+  "weak_areas": [
+    "复杂部署",
+    "外部服务配置"
+  ],
+  "time_budget": "deep-study",
+  "preferred_project_size": "large",
+  "goal_priority": [
+    "ship_demo",
+    "learn_architecture"
+  ],
+  "daily_limit": 10,
+  "industry_tags": [
+    "enterprise_workflow"
+  ],
+  "expertise_level": "advanced_or_deep",
+  "raw_time_budget": "one_two_weeks",
+  "tech_stack_friction": "prefer_integration_ready_stack",
+  "current_pain_points": [
+    "cant_run_locally"
+  ],
+  "preferred_project_traits": [
+    "workflow_ready",
+    "automation_friendly",
+    "integration_ready",
+    "deep_architecture",
+    "learning_roadmap",
+    "clear_quickstart",
+    "low_setup_cost",
+    "containerized_demo",
+    "stable",
+    "maintained",
+    "clear_license",
+    "low_risk",
+    "enterprise_workflow"
+  ],
+  "avoid_project_traits": [
+    "heavy_setup_without_demo",
+    "unclear_installation",
+    "abandoned_repo",
+    "unclear_license",
+    "high_risk",
+    "fragile_setup"
+  ],
+  "report_explanation_style": "workflow_value",
+  "recommendationWeights": {
+    "learning_value": 1.2,
+    "demo_friendliness": 1,
+    "documentation_quality": 1.3,
+    "trend_signal": 0.9,
+    "productization_potential": 1.1,
+    "risk_penalty": 1.6,
+    "setup_cost_penalty": 1.2,
+    "architecture_clarity": 1.2,
+    "integration_potential": 1,
+    "license_clarity": 1.5,
+    "maintenance_signal": 1.5
+  },
+  "persona_metadata": {
+    "source": "sbti",
+    "raw_code": "RBPC",
+    "resolved_code": "RBPC",
+    "resolved_by": "direct",
+    "dimensions": {
+      "action_style": "R",
+      "build_style": "B",
+      "value_preference": "P",
+      "target_scene": "C"
+    },
+    "answers": {
+      "q1": "B",
+      "q2": "A",
+      "q3": "B",
+      "q4": "B",
+      "q5": "enterprise_workflow",
+      "q6": "work_automation",
+      "q7": "one_two_weeks",
+      "q8": "cant_run_locally"
+    },
+    "industry_tags": [
+      "enterprise_workflow"
+    ],
+    "expertise_level": "advanced_or_deep",
+    "raw_time_budget": "one_two_weeks",
+    "tech_stack_friction": "prefer_integration_ready_stack",
+    "current_pain_points": [
+      "cant_run_locally"
+    ],
+    "preferred_project_traits": [
+      "workflow_ready",
+      "automation_friendly",
+      "integration_ready",
+      "deep_architecture",
+      "learning_roadmap",
+      "clear_quickstart",
+      "low_setup_cost",
+      "containerized_demo",
+      "stable",
+      "maintained",
+      "clear_license",
+      "low_risk",
+      "enterprise_workflow"
+    ],
+    "avoid_project_traits": [
+      "heavy_setup_without_demo",
+      "unclear_installation",
+      "abandoned_repo",
+      "unclear_license",
+      "high_risk",
+      "fragile_setup"
+    ],
+    "report_explanation_style": "workflow_value",
+    "recommendationWeights": {
+      "learning_value": 1.2,
+      "demo_friendliness": 1,
+      "documentation_quality": 1.3,
+      "trend_signal": 0.9,
+      "productization_potential": 1.1,
+      "risk_penalty": 1.6,
+      "setup_cost_penalty": 1.2,
+      "architecture_clarity": 1.2,
+      "integration_potential": 1,
+      "license_clarity": 1.5,
+      "maintenance_signal": 1.5
+    }
+  }
+}

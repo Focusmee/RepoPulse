@@ -13,6 +13,8 @@
     "brief": "node scripts/render-brief.js",
     "doctor": "node src/cli.js doctor",
     "profiles": "node src/cli.js profiles",
+    "sbti": "node scripts/generate-sbti-profile.js",
+    "sbti:showcase": "node scripts/generate-sbti-showcase.js",
     "test": "node --test",
     "check": "node scripts/check-syntax.js"
   },

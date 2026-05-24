@@ -1,0 +1,69 @@
+{
+  "generated_by": "scripts/generate-sbti-showcase.js",
+  "output_dir": "outputs/sbti-showcase",
+  "cases": [
+    {
+      "id": "sbti",
+      "title": "火速开搞型",
+      "description": "面向 developer tools、quick demo 和半天 demo 验证。",
+      "answers_path": "examples/sbti/sbti.answers.json",
+      "profile_path": "outputs/sbti-showcase/sbti/profile.json",
+      "persona_result_path": "outputs/sbti-showcase/sbti/persona-result.json",
+      "persona_result_html_path": "outputs/sbti-showcase/sbti/persona-result.html",
+      "raw_code": "SBTI",
+      "persona_code": "SBTI",
+      "persona_name": "火速开搞型",
+      "profile_id": "sbti-sbti-developer-tools-half-day",
+      "report_command": "npm run report -- --profile outputs/sbti-showcase/sbti/profile.json --limit 8 --dry-run",
+      "recommendation_strategy": [
+        "优先推荐 Quick Start 清晰的项目",
+        "优先推荐能快速跑出 demo 的项目",
+        "优先推荐安装和配置成本低的项目",
+        "优先推荐真实问题明确、落地场景清楚的项目",
+        "行动建议：先跑官方示例"
+      ]
+    },
+    {
+      "id": "smpc",
+      "title": "产品化雷达型",
+      "description": "面向 startup validation、产品机会和 2-3 天验证。",
+      "answers_path": "examples/sbti/smpc.answers.json",
+      "profile_path": "outputs/sbti-showcase/smpc/profile.json",
+      "persona_result_path": "outputs/sbti-showcase/smpc/persona-result.json",
+      "persona_result_html_path": "outputs/sbti-showcase/smpc/persona-result.html",
+      "raw_code": "SMPC",
+      "persona_code": "SMPC",
+      "persona_name": "产品化雷达型",
+      "profile_id": "sbti-smpc-general-ai-apps-two-three-days",
+      "report_command": "npm run report -- --profile outputs/sbti-showcase/smpc/profile.json --limit 8 --dry-run",
+      "recommendation_strategy": [
+        "优先推荐有明确用户场景、可产品化的项目",
+        "优先推荐能转成作品集展示的项目",
+        "优先推荐真实问题明确、落地场景清楚的项目",
+        "行动建议：先写目标用户和场景",
+        "行动建议：做一个收费前的最小验证"
+      ]
+    },
+    {
+      "id": "rbpc",
+      "title": "稳健落地派",
+      "description": "面向 enterprise workflow、工作自动化和 1-2 周试点。",
+      "answers_path": "examples/sbti/rbpc.answers.json",
+      "profile_path": "outputs/sbti-showcase/rbpc/profile.json",
+      "persona_result_path": "outputs/sbti-showcase/rbpc/persona-result.json",
+      "persona_result_html_path": "outputs/sbti-showcase/rbpc/persona-result.html",
+      "raw_code": "RBPC",
+      "persona_code": "RBPC",
+      "persona_name": "稳健落地派",
+      "profile_id": "sbti-rbpc-enterprise-workflow-one-two-weeks",
+      "report_command": "npm run report -- --profile outputs/sbti-showcase/rbpc/profile.json --limit 8 --dry-run",
+      "recommendation_strategy": [
+        "优先推荐 Quick Start 清晰的项目",
+        "优先推荐安装和配置成本低的项目",
+        "优先推荐 API / SDK / CLI / MCP 入口清晰的项目",
+        "行动建议：先查许可证和维护状态",
+        "行动建议：做小范围试点"
+      ]
+    }
+  ]
+}

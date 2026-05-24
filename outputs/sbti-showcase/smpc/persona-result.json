@@ -1,0 +1,25 @@
+{
+  "headline": "你是 SMPC / 产品化雷达型",
+  "subheadline": "别人看 Star，你看能不能收钱。",
+  "personaCode": "SMPC",
+  "personaRawCode": "SMPC",
+  "personaName": "产品化雷达型",
+  "nickname": "开源商业嗅探器",
+  "funnyDescription": "别人看 Star，你看能不能收钱。",
+  "seriousDescription": "适合有明确用户场景、可包装成小工具或 SaaS 的项目。",
+  "visualPrompt": "一个像产品侦探一样的 AI 开发者站在 SaaS 看板前，手里拿着放大镜，屏幕上有用户场景、订阅按钮、自动化流程和开源项目卡片。画面轻松、聪明、有商业灵感，适合做 AI 开发者人格分享图。",
+  "profileSummary": {
+    "industry": "通用 AI 应用",
+    "goal": "验证创业方向",
+    "timeBudget": "2-3 天",
+    "painPoint": "不知道值不值得看"
+  },
+  "recommendationStrategy": [
+    "优先推荐有明确用户场景、可产品化的项目",
+    "优先推荐能转成作品集展示的项目",
+    "优先推荐真实问题明确、落地场景清楚的项目",
+    "行动建议：先写目标用户和场景",
+    "行动建议：做一个收费前的最小验证"
+  ],
+  "dailyReportIntro": "今天给你筛项目时，我会优先看它是否匹配你的目标、投入成本和下一步行动，尤其关注 llm / agent / rag 方向。场景优先，解释谁会用、怎么包装、验证成本多高。"
+}

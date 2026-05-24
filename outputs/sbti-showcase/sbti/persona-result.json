@@ -1,0 +1,25 @@
+{
+  "headline": "你是 SBTI / 火速开搞型",
+  "subheadline": "看到好项目不先收藏，先打开终端。",
+  "personaCode": "SBTI",
+  "personaRawCode": "SBTI",
+  "personaName": "火速开搞型",
+  "nickname": "终端先行侠",
+  "funnyDescription": "看到好项目不先收藏，先打开终端。",
+  "seriousDescription": "适合 Quick Start 清晰、demo 成本低、半天内可验证价值的项目。",
+  "visualPrompt": "一个略带兴奋感的 AI 开发者角色，头发有点乱，手里举着终端窗口，背后飞着 API、MCP、GitHub Star 和 demo 按钮，表情像刚发现一个能马上跑起来的开源项目。整体风格轻松、有趣、科技感强，适合做 AI 开发者人格测试结果图。",
+  "profileSummary": {
+    "industry": "开发者工具",
+    "goal": "快速跑 demo",
+    "timeBudget": "半天",
+    "painPoint": "不知道怎么复刻"
+  },
+  "recommendationStrategy": [
+    "优先推荐 Quick Start 清晰的项目",
+    "优先推荐能快速跑出 demo 的项目",
+    "优先推荐安装和配置成本低的项目",
+    "优先推荐真实问题明确、落地场景清楚的项目",
+    "行动建议：先跑官方示例"
+  ],
+  "dailyReportIntro": "今天给你筛项目时，我会优先看它能不能快速跑起来、能不能转成 demo，尤其关注 developer-tools / cli / sdk 方向。行动导向，先给能不能跑、多久能跑、跑通后能做什么。"
+}

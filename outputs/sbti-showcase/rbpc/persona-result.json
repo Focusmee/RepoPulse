@@ -1,0 +1,25 @@
+{
+  "headline": "你是 RBPC / 稳健落地派",
+  "subheadline": "你不是慢，你只是知道生产环境不会陪你开玩笑。",
+  "personaCode": "RBPC",
+  "personaRawCode": "RBPC",
+  "personaName": "稳健落地派",
+  "nickname": "生产环境清醒人",
+  "funnyDescription": "你不是慢，你只是知道生产环境不会陪你开玩笑。",
+  "seriousDescription": "适合成熟度较高、文档完整、风险可控、可在真实业务中试点的项目。",
+  "visualPrompt": "一个冷静的 AI 工程师站在生产环境控制台前，旁边有许可证、监控图、风险清单、稳定版本和架构图标记，表情像在认真评估一个项目能不能进真实业务。整体风格稳健、专业、有轻微幽默感。",
+  "profileSummary": {
+    "industry": "企业流程",
+    "goal": "工作自动化",
+    "timeBudget": "1-2 周",
+    "painPoint": "本地跑不起来"
+  },
+  "recommendationStrategy": [
+    "优先推荐 Quick Start 清晰的项目",
+    "优先推荐安装和配置成本低的项目",
+    "优先推荐 API / SDK / CLI / MCP 入口清晰的项目",
+    "行动建议：先查许可证和维护状态",
+    "行动建议：做小范围试点"
+  ],
+  "dailyReportIntro": "今天给你筛项目时，我会优先看它是否匹配你的目标、投入成本和下一步行动，尤其关注 workflow / enterprise / automation 方向。落地优先，说明维护状态、风险、许可证和试点边界。"
+}

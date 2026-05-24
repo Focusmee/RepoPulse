@@ -31,6 +31,20 @@ export function normalizeProfile(rawProfile = {}, sourcePath = DEFAULT_PROFILE_P
       "medium"
     ),
     goal_priority: normalizeGoalPriority(rawProfile.goal_priority || rawProfile.goalPriority),
+    persona_type: stringOrEmpty(rawProfile.persona_type || rawProfile.personaType),
+    persona_code: stringOrEmpty(rawProfile.persona_code || rawProfile.personaCode),
+    persona_raw_code: stringOrEmpty(rawProfile.persona_raw_code || rawProfile.personaRawCode),
+    persona_name: stringOrEmpty(rawProfile.persona_name || rawProfile.personaName),
+    industry_tags: toStringArray(rawProfile.industry_tags || rawProfile.industryTags),
+    expertise_level: stringOrEmpty(rawProfile.expertise_level || rawProfile.expertiseLevel),
+    raw_time_budget: stringOrEmpty(rawProfile.raw_time_budget || rawProfile.rawTimeBudget),
+    tech_stack_friction: stringOrEmpty(rawProfile.tech_stack_friction || rawProfile.techStackFriction),
+    current_pain_points: toStringArray(rawProfile.current_pain_points || rawProfile.currentPainPoints),
+    preferred_project_traits: toStringArray(rawProfile.preferred_project_traits || rawProfile.preferredProjectTraits),
+    avoid_project_traits: toStringArray(rawProfile.avoid_project_traits || rawProfile.avoidProjectTraits),
+    report_explanation_style: stringOrEmpty(rawProfile.report_explanation_style || rawProfile.reportExplanationStyle),
+    recommendationWeights: normalizeObject(rawProfile.recommendationWeights || rawProfile.recommendation_weights),
+    persona_metadata: normalizeObject(rawProfile.persona_metadata || rawProfile.personaMetadata),
     daily_limit: Number(rawProfile.daily_limit || rawProfile.dailyLimit || 10)
   };
 }
@@ -73,6 +87,15 @@ function toStringArray(value) {
 function normalizeEnum(value, allowed, fallback) {
   const normalized = String(value || "").trim().toLowerCase();
   return allowed.has(normalized) ? normalized : fallback;
+}
+
+function stringOrEmpty(value) {
+  return String(value || "").trim();
+}
+
+function normalizeObject(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  return { ...value };
 }
 
 function normalizeGoalPriority(value) {

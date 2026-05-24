@@ -1,0 +1,150 @@
+{
+  "profile_id": "sbti-sbti-developer-tools-half-day",
+  "generated_by": "scripts/generate-sbti-profile.js",
+  "generated_note": "由 SBTI 脚本生成；如需修改画像，请优先调整 answers 或 src/persona/buildProfileFromSbti.js。",
+  "persona_type": "SBTI",
+  "persona_code": "SBTI",
+  "persona_raw_code": "SBTI",
+  "persona_name": "火速开搞型",
+  "role": "AI 应用开发者 / 独立开发者",
+  "preferred_languages": [],
+  "interested_topics": [
+    "developer-tools",
+    "cli",
+    "sdk",
+    "mcp",
+    "automation",
+    "demo",
+    "template",
+    "starter",
+    "agent",
+    "ai-agents",
+    "workflow"
+  ],
+  "learning_goals": [
+    "快速做 demo",
+    "发现可复刻项目"
+  ],
+  "excluded_topics": [],
+  "skill_level": "intermediate",
+  "known_stack": [
+    "LLM",
+    "OpenAI API",
+    "GitHub",
+    "Agent",
+    "MCP",
+    "Workflow Automation"
+  ],
+  "weak_areas": [],
+  "time_budget": "weekend",
+  "preferred_project_size": "medium",
+  "goal_priority": [
+    "ship_demo",
+    "follow_trend"
+  ],
+  "daily_limit": 8,
+  "industry_tags": [
+    "developer_tools"
+  ],
+  "expertise_level": "intermediate",
+  "raw_time_budget": "half_day",
+  "tech_stack_friction": "prefer_low_setup",
+  "current_pain_points": [
+    "dont_know_how_to_replicate"
+  ],
+  "preferred_project_traits": [
+    "clear_quickstart",
+    "demo_friendly",
+    "low_setup_cost",
+    "runnable_examples",
+    "replicable_project",
+    "clear_use_case",
+    "developer-tools",
+    "agent",
+    "automation",
+    "mcp"
+  ],
+  "avoid_project_traits": [
+    "no_examples",
+    "unclear_license",
+    "missing_replicate_path",
+    "heavy_setup_without_demo",
+    "unclear_docs",
+    "research-only_codebase"
+  ],
+  "report_explanation_style": "action_first",
+  "recommendationWeights": {
+    "learning_value": 1,
+    "demo_friendliness": 1.5,
+    "documentation_quality": 1.1,
+    "trend_signal": 1.1,
+    "productization_potential": 1.2,
+    "risk_penalty": 0.9,
+    "setup_cost_penalty": 1.5,
+    "architecture_clarity": 0.9,
+    "integration_potential": 1.2
+  },
+  "persona_metadata": {
+    "source": "sbti",
+    "raw_code": "SBTI",
+    "resolved_code": "SBTI",
+    "resolved_by": "direct",
+    "dimensions": {
+      "action_style": "S",
+      "build_style": "B",
+      "value_preference": "T",
+      "target_scene": "I"
+    },
+    "answers": {
+      "q1": "A",
+      "q2": "A",
+      "q3": "A",
+      "q4": "A",
+      "q5": "developer_tools",
+      "q6": "quick_demo",
+      "q7": "half_day",
+      "q8": "dont_know_how_to_replicate"
+    },
+    "industry_tags": [
+      "developer_tools"
+    ],
+    "expertise_level": "intermediate",
+    "raw_time_budget": "half_day",
+    "tech_stack_friction": "prefer_low_setup",
+    "current_pain_points": [
+      "dont_know_how_to_replicate"
+    ],
+    "preferred_project_traits": [
+      "clear_quickstart",
+      "demo_friendly",
+      "low_setup_cost",
+      "runnable_examples",
+      "replicable_project",
+      "clear_use_case",
+      "developer-tools",
+      "agent",
+      "automation",
+      "mcp"
+    ],
+    "avoid_project_traits": [
+      "no_examples",
+      "unclear_license",
+      "missing_replicate_path",
+      "heavy_setup_without_demo",
+      "unclear_docs",
+      "research-only_codebase"
+    ],
+    "report_explanation_style": "action_first",
+    "recommendationWeights": {
+      "learning_value": 1,
+      "demo_friendliness": 1.5,
+      "documentation_quality": 1.1,
+      "trend_signal": 1.1,
+      "productization_potential": 1.2,
+      "risk_penalty": 0.9,
+      "setup_cost_penalty": 1.5,
+      "architecture_clarity": 0.9,
+      "integration_potential": 1.2
+    }
+  }
+}

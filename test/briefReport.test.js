@@ -129,7 +129,10 @@ test("builds brief model from full report model without parsing markdown", () =>
       role: "AI 应用开发者",
       preferred_languages: ["TypeScript"],
       interested_topics: ["agent"],
-      learning_goals: ["做应用"]
+      learning_goals: ["做应用"],
+      persona_code: "SBTI",
+      persona_name: "火速开搞型",
+      report_explanation_style: "action_first"
     },
     stats: {
       candidate_count: 10,
@@ -197,6 +200,8 @@ test("builds brief model from full report model without parsing markdown", () =>
   const html = renderBriefHtml(brief);
 
   assert.equal(brief.topItems[0].title, "owner/model-driven");
+  assert.ok(full.profileLine.includes("人格：SBTI / 火速开搞型"));
+  assert.ok(full.profileLine.includes("解释风格：action_first"));
   assert.ok(brief.topItems[0].contextExplanation.includes("帮助开发者搭建 agent 工作流"));
   assert.ok(brief.topItems[0].risks[0].startsWith("中风险"));
   assert.ok(html.includes("项目背景与使用场景"));

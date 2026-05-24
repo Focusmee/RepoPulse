@@ -21,9 +21,7 @@ export function buildFullReportModel({ date, profile = {}, ranked = {}, stats = 
     title: `RepoPulse 日报 - ${date}`,
     date,
     profile,
-    profileLine: `画像：${profile.role || "未设置"}；偏好语言：${joinPlain(profile.preferred_languages) || "未设置"}；关注方向：${joinPlain(
-      profile.interested_topics
-    ) || "未设置"}`,
+    profileLine: buildProfileLine(profile),
     conclusion: topTopics.length
       ? `今天更值得关注的方向是：${topTopics.join("、")}。推荐优先看学习价值高、和画像匹配强、阅读路径清晰的项目。`
       : "今天候选项目较少，建议检查 GitHub Token、网络或 watchlist 配置。",
@@ -40,6 +38,14 @@ export function buildFullReportModel({ date, profile = {}, ranked = {}, stats = 
       "对“谨慎关注”的项目，先核查维护状态和文档质量。"
     ]
   };
+}
+
+function buildProfileLine(profile = {}) {
+  const persona = profile.persona_code && profile.persona_name ? `；人格：${profile.persona_code} / ${profile.persona_name}` : "";
+  const style = profile.report_explanation_style ? `；解释风格：${profile.report_explanation_style}` : "";
+  return `画像：${profile.role || "未设置"}${persona}；偏好语言：${joinPlain(profile.preferred_languages) || "未设置"}；关注方向：${
+    joinPlain(profile.interested_topics) || "未设置"
+  }${style}`;
 }
 
 export function buildReportItem(item, index, profile = {}) {
